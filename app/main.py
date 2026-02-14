@@ -22,7 +22,7 @@ from db import get_postgres_db
 # Create AgentOS
 # ============================================================================
 agent_os = AgentOS(
-    name="AgentOS",
+    name="TheAIBuildr AgentOS",
     tracing=True,
     db=get_postgres_db(),
     agents=[pal, knowledge_agent, mcp_agent],

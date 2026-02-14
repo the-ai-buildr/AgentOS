@@ -9,7 +9,7 @@ Run:
 """
 
 from agno.agent import Agent
-from agno.models.openai import OpenAIResponses
+from agno.models.openrouter import OpenRouter
 from agno.tools.mcp import MCPTools
 
 from db import get_postgres_db
@@ -46,7 +46,7 @@ You are a helpful assistant with access to external tools via MCP (Model Context
 mcp_agent = Agent(
     id="mcp-agent",
     name="MCP Agent",
-    model=OpenAIResponses(id="gpt-5.2"),
+    model=OpenRouter(id="openai/gpt-5.2-chat"),
     db=agent_db,
     tools=[MCPTools(url="https://docs.agno.com/mcp")],
     instructions=instructions,
