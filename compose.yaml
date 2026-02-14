@@ -4,7 +4,7 @@ services:
     container_name: agentos-db
     restart: unless-stopped
     ports:
-      - "5434:5434"
+      - "5434:5432"
     volumes:
       - pgdata:/var/lib/postgresql
     environment:
@@ -20,10 +20,10 @@ services:
       context: .
       dockerfile: Dockerfile
     image: ${IMAGE_NAME:-agno-agentos}:${IMAGE_TAG:-latest}
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8001 --reload
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
     restart: unless-stopped
     ports:
-      - "8001:8001"
+      - "8000:8000"
     volumes:
       - .:/app
       - agentos-data:/data
@@ -32,7 +32,7 @@ services:
       RUNTIME_ENV: dev
       AGNO_DEBUG: "True"
       DB_HOST: agentos-db
-      DB_PORT: 5434
+      DB_PORT: 5432
       DB_USER: ${DB_USER:-ai}
       DB_PASS: ${DB_PASS:-ai}
       DB_DATABASE: ${DB_DATABASE:-ai}
