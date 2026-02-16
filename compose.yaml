@@ -22,8 +22,6 @@ services:
     image: ${IMAGE_NAME:-agno-agentos}:${IMAGE_TAG:-latest}
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
     restart: unless-stopped
-    ports:
-      - "8001:8000"
     volumes:
       - .:/app
       - agentos-data:/data
@@ -42,8 +40,6 @@ services:
       EXA_API_KEY: ${EXA_API_KEY:-}
     depends_on:
       - agentos-db
-    networks:
-      - agentos
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
