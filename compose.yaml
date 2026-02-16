@@ -31,6 +31,7 @@ services:
       DB_USER: ${DB_USER}
       DB_PASS: ${DB_PASS}
       DB_DATABASE: ${DB_DATABASE}
+      OS_SECURITY_KEY: ${OS_SECURITY_KEY}
       WAIT_FOR_DB: "True"
       PRINT_ENV_ON_LOAD: "False"
       OPENROUTER_API_KEY: ${OPENROUTER_API_KEY}
