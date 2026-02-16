@@ -39,11 +39,6 @@ app = agent_os.get_app()
 if __name__ == "__main__":
     agent_os.serve(
         app="main:app",
-        interfaces=[
-            Slack(
-                bot_token=os.environ["SLACK_TOKEN"],
-                signing_secret=os.environ["SLACK_SIGNING_SECRET"],
-            )
-        ],
+        interfaces=[Slack(agent=slack_agent)],
         reload=getenv("RUNTIME_ENV", "prd") == "dev",
     )
