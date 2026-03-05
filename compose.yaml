@@ -17,7 +17,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: ${IMAGE_NAME:-agno-agentos}:${IMAGE_TAG:-latest}
+    # Use IMAGE_NAME/IMAGE_TAG in Coolify (or other CI) so compose uses the image you built instead of pulling
+    image: ${IMAGE_NAME:-agentos-api}:${IMAGE_TAG:-latest}
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000
     restart: unless-stopped
     volumes:
