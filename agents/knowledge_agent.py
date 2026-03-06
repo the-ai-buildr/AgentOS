@@ -11,10 +11,10 @@
 from agno.agent import Agent
 from agno.knowledge import Knowledge
 from agno.knowledge.embedder.openai import OpenAIEmbedder
-from agno.models.openrouter import OpenRouter
 from agno.vectordb.pgvector import PgVector, SearchType
 
 from db import db_url, get_postgres_db
+from models import OpenRouter
 
 # ============================================================================
 # Setup
@@ -59,7 +59,7 @@ You are a knowledge assistant. You answer questions by searching your knowledge 
 knowledge_agent = Agent(
     id="knowledge-agent",
     name="Knowledge Agent",
-    model=OpenRouter(id="gpt-5.2"),
+    model=OpenRouter.create("gpt-5.2"),
     db=agent_db,
     knowledge=knowledge,
     instructions=instructions,

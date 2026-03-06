@@ -24,12 +24,12 @@ from agno.learn import (
     UserMemoryConfig,
     UserProfileConfig,
 )
-from agno.models.openrouter import OpenRouter
 from agno.tools.duckdb import DuckDbTools
 from agno.tools.mcp import MCPTools
 from agno.vectordb.pgvector import PgVector, SearchType
 
 from db import db_url, get_postgres_db
+from models import OpenRouter
 
 # ============================================================================
 # Setup
@@ -170,7 +170,7 @@ Do NOT call save_learning with the note content. The note goes in DuckDB.
 pal = Agent(
     id="pal",
     name="Pal",
-    model=OpenRouter(id="openai/gpt-5.2-chat"),
+    model=OpenRouter.create("openai/gpt-5.2-chat"),
     db=agent_db,
     instructions=instructions,
     # Learning

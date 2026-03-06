@@ -1,13 +1,3 @@
-"""
-AgentOS
-=======
-
-The main entry point for AgentOS.
-
-Run:
-    python -m app.main
-"""
-
 from os import getenv
 from pathlib import Path
 
@@ -15,10 +5,10 @@ from agno.os import AgentOS
 
 from agents.knowledge_agent import knowledge_agent
 from agents.mcp_agent import mcp_agent
+from agents.orchestrator.neo import neo
 from agents.pal import pal, pal_knowledge
 from agno.os.interfaces.slack import Slack
 from agents.slack_agent import slack_agent
-from agents.neo import neo
 from db import get_postgres_db
 import os
 
@@ -27,7 +17,7 @@ import os
 # Create AgentOS
 # ============================================================================
 agent_os = AgentOS(
-    name="The-Ai-Buildr AgentOS",
+    name="The Ai Buildr - AgentOS",
     tracing=True,
     db=get_postgres_db(),
     agents=[neo,pal, knowledge_agent, mcp_agent, slack_agent],

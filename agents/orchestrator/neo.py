@@ -1,5 +1,5 @@
 from agno.agent import Agent
-from agno.models.openrouter import OpenRouter
+from models import OpenRouter
 from agno.learn import (
     LearningMachine,
     LearningMode,
@@ -16,7 +16,7 @@ root_learning = LearningMachine(
 
 neo = Agent(
     name="Neo",
-    model=OpenRouter(id="openai/gpt-5.2-chat"),
+    model=OpenRouter.create("openai/gpt-5.4"),
     learning=root_learning,
     add_history_to_context=True,
     num_history_runs=3,
