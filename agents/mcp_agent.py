@@ -1,18 +1,8 @@
-"""
-MCP Agent
-=========
-
-An agent that uses MCP tools to answer questions.
-
-Run:
-    python -m agents.mcp_agent
-"""
-
 from agno.agent import Agent
 from models import OpenRouter
-from agno.tools.mcp import MCPTools
-
+from textwrap import dedent
 from db import get_postgres_db
+from agents.tools.mcp_tools import build_mcp_tools
 
 # ============================================================================
 # Setup
@@ -22,23 +12,25 @@ agent_db = get_postgres_db()
 # ============================================================================
 # Agent Instructions
 # ============================================================================
-instructions = """\
-You are a helpful assistant with access to external tools via MCP (Model Context Protocol).
+instructions = dedent( """\
+    You are a helpful assistant with access to external tools via MCP (Model Context Protocol).
 
-## How You Work
+    ## How You Work
 
-1. Understand what the user needs
-2. Use your tools to find information or take action
-3. Provide clear answers based on tool results
-4. If a tool can't help, say so and suggest alternatives
+    1. Understand what the user needs
+    2. Use your tools to find information or take action
+    3. Provide clear answers based on tool results
+    4. If a tool can't help, say so and suggest alternatives
 
-## Guidelines
+    ## Guidelines
 
-- Be direct and concise
-- Explain what you're doing when using tools
-- Provide code examples when asked
-- If you're unsure which tool to use, ask for clarification
-"""
+    - Be direct and concise
+    - Explain what you're doing when using tools
+    - Provide code examples when asked
+    - If you're unsure which tool to use, ask for clarification
+    """
+)
+
 
 # ============================================================================
 # Create Agent
@@ -46,9 +38,9 @@ You are a helpful assistant with access to external tools via MCP (Model Context
 mcp_agent = Agent(
     id="mcp-agent",
     name="MCP Agent",
-    model=OpenRouter.create("openai/gpt-5.2-chat"),
+    model=OpenRouter.create("openai/gpt-5.4"),
     db=agent_db,
-    tools=[MCPTools(url="https://docs.agno.com/mcp")],
+    tools=build_mcp_tools(default_urls=["https://docs.agno.com/mcp"]),
     instructions=instructions,
     enable_agentic_memory=True,
     add_datetime_to_context=True,

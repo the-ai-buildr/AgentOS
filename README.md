@@ -103,6 +103,10 @@ docker exec -it agentos-api python -m agents.knowledge_agent
 
 Connects to external tools via the Model Context Protocol.
 
+Configure one or more MCP servers with `MCP_SERVER_URLS` (comma or newline-separated URLs).
+To add Plane MCP, set `PLANE_MCP_API_KEY` and `PLANE_WORKSPACE_SLUG`.
+Server-specific MCP configs live in `agents/tools/mcp_servers/` (one `.json` file per server, auto-loaded).
+
 **Try it:**
 ```
 What tools do you have access to?
@@ -232,6 +236,11 @@ python -m app.main
 | `DB_DATABASE` | No | `ai` | Database name |
 | `DATA_DIR` | No | `/data` | Directory for DuckDB storage |
 | `RUNTIME_ENV` | No | `prd` | Set to `dev` for auto-reload |
+| `MCP_SERVER_URLS` | No | `https://docs.agno.com/mcp` | MCP endpoints for the MCP Agent (comma or newline separated) |
+| `PAL_MCP_SERVER_URLS` | No | Exa MCP URL | MCP endpoints for Pal research tools (comma or newline separated) |
+| `PLANE_MCP_URL` | No | `https://mcp.plane.so/http/api-key/mcp` | Plane MCP endpoint URL |
+| `PLANE_MCP_API_KEY` | No | - | Plane API key used for MCP auth header |
+| `PLANE_WORKSPACE_SLUG` | No | - | Plane workspace slug used for MCP header |
 | `IMAGE_NAME` | No | `agentos-api` | Image name for the API service (set in Coolify to the image you build) |
 | `IMAGE_TAG` | No | `latest` | Image tag (set in Coolify if you use a specific tag) |
 

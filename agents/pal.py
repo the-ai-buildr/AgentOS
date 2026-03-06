@@ -25,9 +25,9 @@ from agno.learn import (
     UserProfileConfig,
 )
 from agno.tools.duckdb import DuckDbTools
-from agno.tools.mcp import MCPTools
 from agno.vectordb.pgvector import PgVector, SearchType
 
+from agents.tools.mcp_tools import build_mcp_tools
 from db import db_url, get_postgres_db
 from models import OpenRouter
 
@@ -182,7 +182,7 @@ pal = Agent(
     ),
     # Tools
     tools=[
-        MCPTools(url=EXA_MCP_URL),  # Research
+        *build_mcp_tools(env_var="PAL_MCP_SERVER_URLS", default_urls=[EXA_MCP_URL]),  # Research
         DuckDbTools(db_path=duckdb_path),  # Data
     ],
     # Context
