@@ -23,6 +23,7 @@ dependencies = [
   "mcp",
   "reportlab",
   "duckduckgo-search",
+  "slack-sdk",
   # Tracing
   "opentelemetry-api",
   "opentelemetry-sdk",
