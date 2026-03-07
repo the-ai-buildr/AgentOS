@@ -235,13 +235,21 @@ python -m app.main
 | `DB_DATABASE` | No | `ai` | Database name |
 | `DATA_DIR` | No | `/data` | Directory for DuckDB storage |
 | `RUNTIME_ENV` | No | `prd` | Set to `dev` for auto-reload |
-| `MCP_SERVER_URLS` | No | `https://docs.agno.com/mcp` | MCP endpoints for the MCP Agent (comma or newline separated) |
+| `MCP_SERVER_URLS` | No | `https://docs.agno.com/mcp` | MCP endpoints for the MCP Agent (comma or newline separated). Set to `none` or use `MCP_DISABLED=1` to disable remote MCP (e.g. when running in Docker and the default URL is unreachable). |
+| `MCP_DISABLED` | No | - | Set to `1`, `true`, or `yes` to disable MCP tools for the MCP Agent (avoids "Failed to initialize MCP toolkit" when the remote server is unreachable). |
 | `AGNO_ASSIST_MCP_SERVER_URLS` | No | - | Optional MCP endpoints for Agno Assist (comma or newline separated) |
 | `PLANE_MCP_URL` | No | `https://mcp.plane.so/http/api-key/mcp` | Plane MCP endpoint URL |
 | `PLANE_MCP_API_KEY` | No | - | Plane API key used for MCP auth header |
 | `PLANE_WORKSPACE_SLUG` | No | - | Plane workspace slug used for MCP header |
 | `IMAGE_NAME` | No | `agentos-api` | Image name for the API service (set in Coolify to the image you build) |
 | `IMAGE_TAG` | No | `latest` | Image tag (set in Coolify if you use a specific tag) |
+
+---
+
+## Troubleshooting
+
+- **"Failed to initialize MCP toolkit"** – The Agno MCP client cannot reach the configured MCP server(s). In Docker or restricted networks, set `MCP_DISABLED=1` (or `MCP_SERVER_URLS=none`) so the MCP agent runs without remote tools; you can still use local MCP servers defined in `src/tools/mcp_servers/*.json`.
+- **WebSocket error: (, '')** – Usually harmless: the client (e.g. OS UI) closed the workflow WebSocket (e.g. switching tabs or agents). No action needed unless workflows consistently fail to run.
 
 ---
 

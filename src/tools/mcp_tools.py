@@ -1,10 +1,13 @@
 import json
+import logging
 import os
 import shlex
 from pathlib import Path
 from typing import Any, Iterable
 
 from agno.tools.mcp import MCPTools, StreamableHTTPClientParams
+
+log = logging.getLogger(__name__)
 
 
 TOOLS_DIR = Path(__file__).resolve().parent
@@ -83,7 +86,18 @@ def _build_tool_from_config(config: dict[str, Any]) -> MCPTools | None:
     return None
 
 
-def get_mcp_urls(*, env_var: str = "MCP_SERVER_URLS", default_urls: Iterable[str] | None = None) -> list[str]:
+def get_mcp_urls(
+    *,
+    env_var: str = "MCP_SERVER_URLS",
+    default_urls: Iterable[str] | None = None,
+    disable_env_var: str = "MCP_DISABLED",
+ ) -> list[str]:
+    """Return MCP server URLs from env; use default_urls only when env is unset."""
+    if os.getenv(disable_env_var, "").strip().lower() in ("1", "true", "yes"):
+        return []
+    raw = os.getenv(env_var, "").strip().lower()
+    if raw in ("none", "disabled", "false", "0"):
+        return []
     configured_urls = _parse_urls(os.getenv(env_var, ""))
     return configured_urls if configured_urls else list(default_urls or [])
 
@@ -92,8 +106,17 @@ def build_mcp_tools(
     *,
     env_var: str = "MCP_SERVER_URLS",
     default_urls: Iterable[str] | None = None,
+    disable_env_var: str = "MCP_DISABLED",
  ) -> list[MCPTools]:
-    tools = [MCPTools(url=url) for url in get_mcp_urls(env_var=env_var, default_urls=default_urls)]
+    urls = get_mcp_urls(
+        env_var=env_var, default_urls=default_urls, disable_env_var=disable_env_var
+    )
+    tools: list[MCPTools] = []
+    for url in urls:
+        try:
+            tools.append(MCPTools(url=url))
+        except Exception as e:
+            log.warning("Skipping MCP server %s: %s", url, e)
 
     if not SERVER_FILES_DIR.exists():
         return tools

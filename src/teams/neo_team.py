@@ -11,7 +11,7 @@ from agno.learn import (
 from agno.learn.stores import learned_knowledge
 from src.prompts import load_prompt
 from src.models import OpenRouter
-from src.tools.mcp_tools import build_mcp_tools
+# from src.tools.mcp_tools import build_mcp_tools
 from db import get_postgres_db
 
 # Learning Machine Configuration
