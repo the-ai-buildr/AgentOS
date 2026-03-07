@@ -10,11 +10,11 @@ Deploy a multi-agent system to production with Docker.
 
 | Agent | Pattern | Description |
 |-------|---------|-------------|
-| **Pal** | Learning + Tools | Your AI-powered second brain |
+| **Agno Assist** | Learning + Tools | Your AI-powered second brain |
 | Knowledge Agent | RAG | Answers questions from a knowledge base |
 | MCP Agent | Tool Use | Connects to external services via MCP |
 
-**Pal** (Personal Agent that Learns) is your AI-powered second brain. It researches, captures, organizes, connects, and retrieves your personal knowledge - so nothing useful is ever lost.
+**Agno Assist** (Personal Agent that Learns) is your AI-powered second brain. It researches, captures, organizes, connects, and retrieves your personal knowledge - so nothing useful is ever lost.
 
 ---
 
@@ -52,11 +52,11 @@ docker compose up -d --build
 
 ## The Agents
 
-### Pal (Personal Agent that Learns)
+### Agno Assist (Personal Agent that Learns)
 
-Your AI-powered second brain. Pal researches, captures, organizes, connects, and retrieves your personal knowledge - so nothing useful is ever lost.
+Your AI-powered second brain. Agno Assist researches, captures, organizes, connects, and retrieves your personal knowledge - so nothing useful is ever lost.
 
-**What Pal stores:**
+**What Agno Assist stores:**
 
 | Type | Examples |
 |------|----------|
@@ -79,9 +79,9 @@ What do I know about event sourcing?
 **How it works:**
 - **DuckDB** stores your actual data (notes, bookmarks, people, etc.)
 - **Learning system** remembers schemas and research findings
-- **Exa search** powers web research, company lookup, and people search
+- **DuckDuckGo search** powers web research and discovery
 
-**Data persistence:** Pal stores structured data in DuckDB at `/data/pal.db`. This persists across container restarts.
+**Data persistence:** Agno Assist stores structured data in DuckDB at `/data/agno_assist.db`. This persists across container restarts.
 
 ### Knowledge Agent
 
@@ -119,7 +119,7 @@ Find examples of agents with memory
 ## Project Structure
 ```
 ├── agents/
-│   ├── pal.py              # Personal second brain agent
+│   ├── agno_assist.py      # Personal second brain agent
 │   ├── knowledge_agent.py  # RAG agent
 │   └── mcp_agent.py        # MCP tools agent
 ├── app/
@@ -161,7 +161,7 @@ from agents.my_agent import my_agent
 
 agent_os = AgentOS(
     name="AgentOS",
-    agents=[pal, knowledge_agent, mcp_agent, my_agent],
+    agents=[agno_assist, knowledge_agent, mcp_agent, my_agent],
     ...
 )
 ```
@@ -228,7 +228,6 @@ python -m app.main
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
 | `OPENAI_API_KEY` | Yes | - | OpenAI API key |
-| `EXA_API_KEY` | No | - | Exa API key for web research |
 | `DB_HOST` | No | `localhost` | Database host |
 | `DB_PORT` | No | `5432` | Database port |
 | `DB_USER` | No | `ai` | Database user |
@@ -237,7 +236,7 @@ python -m app.main
 | `DATA_DIR` | No | `/data` | Directory for DuckDB storage |
 | `RUNTIME_ENV` | No | `prd` | Set to `dev` for auto-reload |
 | `MCP_SERVER_URLS` | No | `https://docs.agno.com/mcp` | MCP endpoints for the MCP Agent (comma or newline separated) |
-| `PAL_MCP_SERVER_URLS` | No | Exa MCP URL | MCP endpoints for Pal research tools (comma or newline separated) |
+| `AGNO_ASSIST_MCP_SERVER_URLS` | No | - | Optional MCP endpoints for Agno Assist (comma or newline separated) |
 | `PLANE_MCP_URL` | No | `https://mcp.plane.so/http/api-key/mcp` | Plane MCP endpoint URL |
 | `PLANE_MCP_API_KEY` | No | - | Plane API key used for MCP auth header |
 | `PLANE_WORKSPACE_SLUG` | No | - | Plane workspace slug used for MCP header |
@@ -257,9 +256,9 @@ After setting these, redeploy so `docker compose up -d` uses the built image.
 
 ---
 
-## Extending Pal
+## Extending Agno Assist
 
-Pal is designed to be extended. Connect it to your existing tools:
+Agno Assist is designed to be extended. Connect it to your existing tools:
 
 ### Communication
 ```python

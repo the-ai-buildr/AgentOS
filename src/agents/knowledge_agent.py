@@ -1,20 +1,11 @@
-"""
-    Knowledge Agent
-    ===============
-
-    An agent that answers questions using a knowledge base.
-
-    Run:
-        python -m agents.knowledge_agent
-    """
-
 from agno.agent import Agent
 from agno.knowledge import Knowledge
 from agno.knowledge.embedder.openai import OpenAIEmbedder
 from agno.vectordb.pgvector import PgVector, SearchType
 
+from src.prompts import load_prompt
+from src.models import OpenRouter
 from db import db_url, get_postgres_db
-from models import OpenRouter
 
 # ============================================================================
 # Setup
@@ -33,36 +24,15 @@ knowledge = Knowledge(
 )
 
 # ============================================================================
-# Agent Instructions
-# ============================================================================
-instructions = """\
-You are a knowledge assistant. You answer questions by searching your knowledge base.
-
-## How You Work
-
-1. Search the knowledge base for relevant information
-2. Answer based on what you find
-3. Cite your sources
-4. If the information isn't in the knowledge base, say so clearly
-
-## Guidelines
-
-- Be direct and concise
-- Quote relevant passages when they add value
-- Provide code examples when asked
-- Don't make up information - only use what's in the knowledge base
-"""
-
-# ============================================================================
 # Create Agent
 # ============================================================================
 knowledge_agent = Agent(
     id="knowledge-agent",
     name="Knowledge Agent",
-    model=OpenRouter.create("gpt-5.2"),
+    model=OpenRouter.create("openai/gpt-5.4"),
     db=agent_db,
     knowledge=knowledge,
-    instructions=instructions,
+    instructions=load_prompt("knowledge_agent.md"),
     search_knowledge=True,
     enable_agentic_memory=True,
     add_datetime_to_context=True,

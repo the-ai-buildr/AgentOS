@@ -39,7 +39,6 @@ services:
       SLACK_TOKEN: ${SLACK_TOKEN}
       SLACK_SIGNING_SECRET: ${SLACK_SIGNING_SECRET}
       SLACK_GROUP_POLICY: ${SLACK_GROUP_POLICY:-open}
-      EXA_API_KEY: ${EXA_API_KEY:-}
     depends_on:
       - agentos-db
     extra_hosts:

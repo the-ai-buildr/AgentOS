@@ -1,6 +1,23 @@
 chat:
   quick_prompts:
-    pal:
+    neo-agent:
+      - "What is your orchestrator team topology?"
+      - "Given three approved issues, how would you route them?"
+    chief-of-staff:
+      - "Take this approved issue and prepare a dispatch plan."
+      - "How do you close the loop from In Progress to Done?"
+    pulse-dispatcher:
+      - "Run your pulse logic on approved and pending issues."
+      - "How do you detect and escalate stalled tasks?"
+    dev-agent:
+      - "Implement a safe minimal fix and provide verification steps."
+    research-agent:
+      - "Research this topic and provide a decision-ready summary."
+    ops-agent:
+      - "Prepare a safe deployment checklist with rollback notes."
+    content-agent:
+      - "Draft a concise stakeholder update for a completed task."
+    agno-assist:
       - "Tell me about yourself"
       - "Note: decided to use Postgres for the new project"
       - "Research event sourcing patterns and save the key findings"

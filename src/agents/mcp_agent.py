@@ -1,36 +1,13 @@
 from agno.agent import Agent
-from models import OpenRouter
-from textwrap import dedent
+from src.models import OpenRouter
 from db import get_postgres_db
-from agents.tools.mcp_tools import build_mcp_tools
+from src.tools.mcp_tools import build_mcp_tools
+from src.prompts import load_prompt
 
 # ============================================================================
 # Setup
 # ============================================================================
 agent_db = get_postgres_db()
-
-# ============================================================================
-# Agent Instructions
-# ============================================================================
-instructions = dedent( """\
-    You are a helpful assistant with access to external tools via MCP (Model Context Protocol).
-
-    ## How You Work
-
-    1. Understand what the user needs
-    2. Use your tools to find information or take action
-    3. Provide clear answers based on tool results
-    4. If a tool can't help, say so and suggest alternatives
-
-    ## Guidelines
-
-    - Be direct and concise
-    - Explain what you're doing when using tools
-    - Provide code examples when asked
-    - If you're unsure which tool to use, ask for clarification
-    """
-)
-
 
 # ============================================================================
 # Create Agent
@@ -41,7 +18,7 @@ mcp_agent = Agent(
     model=OpenRouter.create("openai/gpt-5.4"),
     db=agent_db,
     tools=build_mcp_tools(default_urls=["https://docs.agno.com/mcp"]),
-    instructions=instructions,
+    instructions=load_prompt("mcp_agent.md"),
     enable_agentic_memory=True,
     add_datetime_to_context=True,
     add_history_to_context=True,

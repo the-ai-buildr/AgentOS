@@ -19,6 +19,7 @@ ModelType = Literal[
     "openai-mini",
     "gemini-pro",
     "gemini-flash",
+    "kimi",
 ]
 MODEL_PRESETS: dict[ModelType, str] = {
     "default": DEFAULT_MODEL_ID,
@@ -31,6 +32,7 @@ MODEL_PRESETS: dict[ModelType, str] = {
     "openai-mini": "openai/gpt-5-nano",
     "gemini-pro": "google/gemini-3.1-pro-preview",
     "gemini-flash": "google/gemini-3.1-flash-lite-preview",
+    "kimi": "moonshotai/kimi-k2.5",
 }
 
 
@@ -95,4 +97,9 @@ class OpenRouter(AgnoOpenRouter):
     def create_mini(cls, **kwargs: Any) -> "OpenRouter":
         """Create a Mini preset model instance."""
         return cls.create(model_type="mini", **kwargs)
+
+    @classmethod
+    def create_kimi_k2_5(cls, **kwargs: Any) -> "OpenRouter":
+        """Create a Kimi K2.5 preset model instance."""
+        return cls.create(model_type="kimi", **kwargs)
 
