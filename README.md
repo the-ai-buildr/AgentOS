@@ -178,7 +178,17 @@ The MCP setup is intentionally simple and env-driven in `src/tools/mcp_tools.py`
 
 #### Plane MCP with this minimal setup
 
-This project now supports URL-based MCP endpoints only. If your Plane MCP requires auth headers (such as `Authorization` and `X-Workspace-slug`), place a small MCP gateway/proxy in front of Plane and put that gateway URL in `MCP_SERVER_URLS`.
+For self-hosted Plane, this project supports Plane MCP via stdio (`uvx plane-mcp-server stdio`) when Plane env vars are set:
+
+```env
+MCP_DISABLED=0
+MCP_SERVER_URLS=none
+PLANE_BASE_URL=https://plane.theaibuildr.com
+PLANE_API_KEY=<plane-api-key>
+PLANE_WORKSPACE_SLUG=<workspace-slug>
+```
+
+You can also keep other MCP URLs in `MCP_SERVER_URLS` (comma/newline list) if needed.
 
 ---
 
@@ -307,6 +317,9 @@ python -m app.main
 | `MCP_SERVER_URLS` | No | `https://docs.agno.com/mcp` | MCP endpoints for Neo tool-execution agents (comma or newline separated). Set to `none` or use `MCP_DISABLED=1` to disable remote MCP (e.g. when running in Docker and the default URL is unreachable). |
 | `MCP_DISABLED` | No | - | Set to `1`, `true`, or `yes` to disable MCP tools for Neo tool-execution agents (avoids "Failed to initialize MCP toolkit" when the remote server is unreachable). |
 | `AGNO_ASSIST_MCP_SERVER_URLS` | No | - | Optional MCP endpoints for Agno Assist (comma or newline separated) |
+| `PLANE_BASE_URL` | No | - | Base URL of your Plane instance (e.g. `https://plane.theaibuildr.com`) for Plane stdio MCP |
+| `PLANE_API_KEY` | No | - | Plane API key used by Plane stdio MCP |
+| `PLANE_WORKSPACE_SLUG` | No | - | Plane workspace slug used by Plane stdio MCP |
 | `IMAGE_NAME` | No | `agentos-api` | Image name for the API service (set in Coolify to the image you build) |
 | `IMAGE_TAG` | No | `latest` | Image tag (set in Coolify if you use a specific tag) |
 | `PORT` | No | `8080` | Host port for the API (maps to container port `8000`; set in Coolify to another port, e.g. `8001`, if needed) |
@@ -337,6 +350,18 @@ Coolify builds the image in a helper container and tags it with its own name. To
 - **PORT** – If deploy fails with "Bind for 0.0.0.0:8000 failed: port is already allocated", set **PORT** to a free port (e.g. `8001`) in Coolify's environment variables so the API binds to that port instead.
 
 After setting these, redeploy so `docker compose up -d` uses the built image.
+
+### Plane MCP on Coolify (self-hosted)
+
+Set these env vars:
+
+- `MCP_DISABLED=0`
+- `MCP_SERVER_URLS=none` (or keep other non-Plane MCP URLs here)
+- `PLANE_BASE_URL=https://plane.theaibuildr.com`
+- `PLANE_API_KEY=<your-plane-api-key>`
+- `PLANE_WORKSPACE_SLUG=Agent-ws`
+
+The app will auto-add Plane MCP through stdio when these are present.
 
 ---
 

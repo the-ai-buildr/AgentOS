@@ -23,6 +23,7 @@ dependencies = [
   # Tools
   "mcp",
   "reportlab",
+  "ddgs",
   "duckduckgo-search",
   "slack-sdk",
   # Tracing

@@ -23,6 +23,6 @@ This folder contains the runtime composition, teams, agents, prompts, and tools 
 
 ## Tools and Prompts
 
-- `src/tools/mcp_tools.py` - Simple env-driven MCP setup (`MCP_SERVER_URLS` only).
+- `src/tools/mcp_tools.py` - URL-driven MCP setup plus optional Plane stdio MCP from env vars.
 - `src/prompts/*.md` - Role and behavior prompts for agents/teams.
 
