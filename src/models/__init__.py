@@ -1,5 +1,5 @@
 """Model abstractions exposed by the local models package."""
 
-from .openrouter import OpenRouter
+from .openrouter import ModelType, OpenRouter
 
-__all__ = ["OpenRouter"]
+__all__ = ["OpenRouter", "ModelType"]
