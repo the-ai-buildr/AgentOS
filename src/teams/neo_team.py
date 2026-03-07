@@ -9,6 +9,7 @@ from agno.learn import (
     UserMemoryConfig,
     UserProfileConfig,
 )
+from agno.skills import LocalSkills, Skills
 from agno.team import Team
 from agno.team.mode import TeamMode
 from agno.tools.duckdb import DuckDbTools
@@ -28,6 +29,9 @@ db = get_postgres_db()
 data_dir = Path(getenv("DATA_DIR", "/data"))
 data_dir.mkdir(parents=True, exist_ok=True)
 duckdb_path = str(data_dir / "neo_team.db")
+
+skills_dir = Path(__file__).resolve().parent.parent / "skills"
+neo_skills = Skills(loaders=[LocalSkills(str(skills_dir))])
 
 # ============================================================================
 # Learning Machine (shared across the team)
@@ -162,6 +166,7 @@ project_manager = Agent(
     model=OpenRouter.create(model_type="claude-sonnet"),
     instructions=load_prompt("project_manager.md"),
     tools=[ReasoningTools(add_instructions=True)],
+    skills=neo_skills,
     add_datetime_to_context=True,
     markdown=True,
 )
@@ -173,6 +178,7 @@ plane_agent = Agent(
     model=OpenRouter.create(model_type="gemini-flash"),
     instructions=load_prompt("plane_agent.md"),
     tools=build_mcp_tools(),
+    skills=neo_skills,
     add_datetime_to_context=True,
     markdown=True,
 )
@@ -199,6 +205,25 @@ content_agent = Agent(
     model=OpenRouter.create(model_type="claude-sonnet"),
     instructions=load_prompt("exec_content_agent.md"),
     add_datetime_to_context=True,
+    markdown=True,
+)
+
+# ============================================================================
+# Pulse Agent (autonomous scheduler-driven heartbeat)
+# ============================================================================
+
+pulse_agent = Agent(
+    id="neo-pulse",
+    name="Pulse Dispatcher",
+    role="Autonomous operations heartbeat. Scans Plane for ready work, dispatches to team members, detects stalled tasks, and logs operational intelligence.",
+    model=OpenRouter.create(model_type="gemini-flash"),
+    instructions=load_prompt("pulse_dispatcher.md"),
+    tools=build_mcp_tools(),
+    skills=neo_skills,
+    learning=neo_team_learning_store,
+    add_datetime_to_context=True,
+    enable_agentic_memory=True,
+    add_memories_to_context=True,
     markdown=True,
 )
 

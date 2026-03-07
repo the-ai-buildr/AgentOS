@@ -8,7 +8,7 @@ authors = [{ name = "The-Ai-Buildr", email = "hello@the-ai-buildr.com" }]
 
 dependencies = [
   # Agno
-  "agno",
+  "agno[scheduler]",
   "agno-infra",
   # API
   "fastapi[standard]",
