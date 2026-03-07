@@ -1,3 +1,5 @@
+"""RAG-oriented agent for document-backed knowledge retrieval."""
+
 from agno.agent import Agent
 from agno.knowledge import Knowledge
 from agno.knowledge.embedder.openai import OpenAIEmbedder
@@ -59,3 +61,6 @@ def load_default_documents() -> None:
 
 if __name__ == "__main__":
     load_default_documents()
+
+
+__all__ = ["knowledge_agent", "knowledge", "load_default_documents"]

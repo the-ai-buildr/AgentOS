@@ -1,4 +1,5 @@
-from agno.os.interfaces.slack import Slack
+"""Optional Slack-facing conversational agent."""
+
 from agno.agent import Agent
 from src.models import OpenRouter
 from src.prompts import load_prompt
@@ -14,3 +15,6 @@ slack_agent = Agent(
 
 if __name__ == "__main__":
     slack_agent.print_response("Tell me about yourself", stream=True)
+
+
+__all__ = ["slack_agent"]
