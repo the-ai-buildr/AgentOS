@@ -1,22 +1,35 @@
 chat:
   quick_prompts:
-    neo-agent:
-      - "What is your orchestrator team topology?"
+    neo-team:
+      - "What is your team topology and how do you route work?"
+      - "I have a new project idea — help me think it through."
       - "Given three approved issues, how would you route them?"
-    chief-of-staff:
-      - "Take this approved issue and prepare a dispatch plan."
-      - "How do you close the loop from In Progress to Done?"
-    pulse-dispatcher:
-      - "Run your pulse logic on approved and pending issues."
-      - "How do you detect and escalate stalled tasks?"
-    dev-agent:
-      - "Implement a safe minimal fix and provide verification steps."
-    research-agent:
+    neo-communication-agent:
+      - "I want to build something but I'm not sure where to start."
+      - "Help me clarify the requirements for my project."
+    neo-project-manager:
+      - "Break this objective into a task plan with dependencies."
+      - "Review the current task plan and identify the next step."
+    neo-plane-agent:
+      - "List all active projects and their current status."
+      - "Create issues from this task plan."
+      - "What prompts and templates are stored in Plane?"
+    neo-tools-agent:
+      - "What tools do you have access to?"
+      - "Search the web for the latest on this topic."
+    neo-dev-team:
+      - "Implement this task and verify against the acceptance criteria."
+      - "What is your approach for this implementation?"
+    neo-research-team:
       - "Research this topic and provide a decision-ready summary."
-    ops-agent:
-      - "Prepare a safe deployment checklist with rollback notes."
-    content-agent:
-      - "Draft a concise stakeholder update for a completed task."
+      - "Compare these two approaches with evidence."
+    neo-exec-content:
+      - "Draft a stakeholder update for this completed work."
+      - "Write documentation for this feature."
+    neo-pulse:
+      - "Run your pulse cycle now."
+      - "What is the current health status across all projects?"
+      - "Are there any stalled or blocked tasks?"
     agno-assist:
       - "Tell me about yourself"
       - "Note: decided to use Postgres for the new project"

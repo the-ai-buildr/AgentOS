@@ -1,3 +1,5 @@
+"""Primary personal-assistant agent with memory and tool access."""
+
 from os import getenv
 from pathlib import Path
 
@@ -74,3 +76,6 @@ agno_assist = Agent(
 
 if __name__ == "__main__":
     agno_assist.print_response("Tell me about yourself", stream=True)
+
+
+__all__ = ["agno_assist", "agno_assist_knowledge"]

@@ -20,6 +20,8 @@ ModelType = Literal[
     "gemini-pro",
     "gemini-flash",
     "kimi",
+    "perplexity-reasoning",
+    "perplexity-pro",
 ]
 MODEL_PRESETS: dict[ModelType, str] = {
     "default": DEFAULT_MODEL_ID,
@@ -33,6 +35,8 @@ MODEL_PRESETS: dict[ModelType, str] = {
     "gemini-pro": "google/gemini-3.1-pro-preview",
     "gemini-flash": "google/gemini-3.1-flash-lite-preview",
     "kimi": "moonshotai/kimi-k2.5",
+    "perplexity-reasoning": "perplexity/sonar-reasoning-pro",
+    "perplexity-pro": "perplexity/sonar-pro",
 }
 
 

@@ -1,9 +1,0 @@
-{
-  "url": "https://mcp.plane.so/http/api-key/mcp",
-  "url_env": "PLANE_MCP_URL",
-  "transport": "streamable-http",
-  "headers": {
-    "Authorization": "Bearer $PLANE_MCP_API_KEY",
-    "X-Workspace-slug": "$PLANE_WORKSPACE_SLUG"
-  }
-}

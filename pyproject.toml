@@ -8,8 +8,9 @@ authors = [{ name = "The-Ai-Buildr", email = "hello@the-ai-buildr.com" }]
 
 dependencies = [
   # Agno
-  "agno",
+  "agno[scheduler]",
   "agno-infra",
+  "croniter",
   # API
   "fastapi[standard]",
   # Models
@@ -22,6 +23,7 @@ dependencies = [
   # Tools
   "mcp",
   "reportlab",
+  "ddgs",
   "duckduckgo-search",
   "slack-sdk",
   # Tracing

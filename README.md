@@ -12,7 +12,7 @@ Deploy a multi-agent system to production with Docker.
 |-------|---------|-------------|
 | **Agno Assist** | Learning + Tools | Your AI-powered second brain |
 | Knowledge Agent | RAG | Answers questions from a knowledge base |
-| MCP Agent | Tool Use | Connects to external services via MCP |
+| Neo Orchestrator Team | Team of Teams | Routes work across communication, planning, tools, dev, research, and content roles |
 
 **Agno Assist** (Personal Agent that Learns) is your AI-powered second brain. It researches, captures, organizes, connects, and retrieves your personal knowledge - so nothing useful is ever lost.
 
@@ -38,15 +38,15 @@ cp example.env .env
 docker compose up -d --build
 ```
 
-- **API**: http://localhost:8000
-- **Docs**: http://localhost:8000/docs
-- **Database**: localhost:5432
+- **API**: http://localhost:8080
+- **Docs**: http://localhost:8080/docs
+- **Database**: internal-only (container network)
 
 ### 3. Connect to control plane
 
 1. Open [os.agno.com](https://os.agno.com)
 2. Click "Add OS" → "Local"
-3. Enter `http://localhost:8000`
+3. Enter `http://localhost:8080`
 
 ---
 
@@ -90,11 +90,11 @@ This builds the API image and starts:
 
 | What        | URL                        |
 |-------------|----------------------------|
-| API         | http://localhost:8000      |
-| OpenAPI docs| http://localhost:8000/docs |
-| Health      | http://localhost:8000/health |
+| API         | http://localhost:8080      |
+| OpenAPI docs| http://localhost:8080/docs |
+| Health      | http://localhost:8080/health |
 
-PostgreSQL is exposed on **localhost:5434** (host) → 5432 (container). Use `DB_HOST=localhost` and `DB_PORT=5434` if you connect from the host (e.g. a local client or IDE).
+PostgreSQL is internal-only in Docker Compose (not published to host).
 
 ### 4. Useful commands
 
@@ -169,29 +169,38 @@ What documents are in your knowledge base?
 docker exec -it agentos-api python -m src.agents.knowledge_agent
 ```
 
-### MCP Agent
+### Tools + MCP (via Neo Team)
 
-Connects to external tools via the Model Context Protocol.
+Tool execution is now handled by Neo team members (`tools_agent`, `plane_agent`, and `pulse_agent`) instead of a standalone MCP agent.
 
 Configure one or more MCP servers with `MCP_SERVER_URLS` (comma or newline-separated URLs).
-To add Plane MCP, set `PLANE_MCP_API_KEY` and `PLANE_WORKSPACE_SLUG`.
-Server-specific MCP configs live in `agents/tools/mcp_servers/` (one `.json` file per server, auto-loaded).
+The MCP setup is intentionally simple and env-driven in `src/tools/mcp_tools.py`.
 
-**Try it:**
+#### Plane MCP with this minimal setup
+
+For self-hosted Plane, this project supports Plane MCP via stdio (`uvx plane-mcp-server stdio`) when Plane env vars are set:
+
+```env
+MCP_DISABLED=0
+MCP_SERVER_URLS=none
+PLANE_BASE_URL=https://plane.theaibuildr.com
+PLANE_API_KEY=<plane-api-key>
+PLANE_WORKSPACE_SLUG=<workspace-slug>
 ```
-What tools do you have access to?
-Search the docs for how to use LearningMachine
-Find examples of agents with memory
-```
+
+You can also keep other MCP URLs in `MCP_SERVER_URLS` (comma/newline list) if needed.
 
 ---
 
 ## Project Structure
 ```
-├── agents/
-│   ├── agno_assist.py      # Personal second brain agent
-│   ├── knowledge_agent.py  # RAG agent
-│   └── mcp_agent.py        # MCP tools agent
+├── src/
+│   ├── agents/             # Standalone agents (assist, knowledge, slack)
+│   ├── teams/              # Neo orchestrator + sub-teams
+│   ├── tools/              # MCP tool loading/config
+│   ├── runtime/            # AgentOS bootstrap/composition root
+│   ├── config/             # Runtime settings
+│   └── schedules/          # Scheduler registrations
 ├── app/
 │   ├── main.py             # AgentOS entry point
 │   └── config.yaml         # Quick prompts config
@@ -210,7 +219,7 @@ Find examples of agents with memory
 
 ### Add your own agent
 
-1. Create `agents/my_agent.py`:
+1. Create `src/agents/my_agent.py`:
 ```python
 from agno.agent import Agent
 from agno.models.openai import OpenAIResponses
@@ -225,13 +234,13 @@ my_agent = Agent(
 )
 ```
 
-2. Register in `app/main.py`:
+2. Register in `src/runtime/bootstrap.py`:
 ```python
-from agents.my_agent import my_agent
+from src.agents.my_agent import my_agent
 
 agent_os = AgentOS(
     name="AgentOS",
-    agents=[agno_assist, knowledge_agent, mcp_agent, my_agent],
+    agents=[agno_assist, knowledge_agent, my_agent],
     ...
 )
 ```
@@ -305,15 +314,15 @@ python -m app.main
 | `DB_DATABASE` | No | `ai` | Database name |
 | `DATA_DIR` | No | `/data` | Directory for DuckDB storage |
 | `RUNTIME_ENV` | No | `prd` | Set to `dev` for auto-reload |
-| `MCP_SERVER_URLS` | No | `https://docs.agno.com/mcp` | MCP endpoints for the MCP Agent (comma or newline separated). Set to `none` or use `MCP_DISABLED=1` to disable remote MCP (e.g. when running in Docker and the default URL is unreachable). |
-| `MCP_DISABLED` | No | - | Set to `1`, `true`, or `yes` to disable MCP tools for the MCP Agent (avoids "Failed to initialize MCP toolkit" when the remote server is unreachable). |
+| `MCP_SERVER_URLS` | No | `https://docs.agno.com/mcp` | MCP endpoints for Neo tool-execution agents (comma or newline separated). Set to `none` or use `MCP_DISABLED=1` to disable remote MCP (e.g. when running in Docker and the default URL is unreachable). |
+| `MCP_DISABLED` | No | - | Set to `1`, `true`, or `yes` to disable MCP tools for Neo tool-execution agents (avoids "Failed to initialize MCP toolkit" when the remote server is unreachable). |
 | `AGNO_ASSIST_MCP_SERVER_URLS` | No | - | Optional MCP endpoints for Agno Assist (comma or newline separated) |
-| `PLANE_MCP_URL` | No | `https://mcp.plane.so/http/api-key/mcp` | Plane MCP endpoint URL |
-| `PLANE_MCP_API_KEY` | No | - | Plane API key used for MCP auth header |
-| `PLANE_WORKSPACE_SLUG` | No | - | Plane workspace slug used for MCP header |
+| `PLANE_BASE_URL` | No | - | Base URL of your Plane instance (e.g. `https://plane.theaibuildr.com`) for Plane stdio MCP |
+| `PLANE_API_KEY` | No | - | Plane API key used by Plane stdio MCP |
+| `PLANE_WORKSPACE_SLUG` | No | - | Plane workspace slug used by Plane stdio MCP |
 | `IMAGE_NAME` | No | `agentos-api` | Image name for the API service (set in Coolify to the image you build) |
 | `IMAGE_TAG` | No | `latest` | Image tag (set in Coolify if you use a specific tag) |
-| `PORT` | No | `8000` | Host port for the API (set in Coolify to another port, e.g. `8001`, if "port is already allocated") |
+| `PORT` | No | `8080` | Host port for the API (maps to container port `8000`; set in Coolify to another port, e.g. `8001`, if needed) |
 
 ---
 
@@ -327,7 +336,7 @@ python -m app.main
   ```
   Or: `make clean && make up`.
 
-- **"Failed to initialize MCP toolkit"** – The Agno MCP client cannot reach the configured MCP server(s). In Docker or restricted networks, set `MCP_DISABLED=1` (or `MCP_SERVER_URLS=none`) so the MCP agent runs without remote tools; you can still use local MCP servers defined in `src/tools/mcp_servers/*.json`.
+- **"Failed to initialize MCP toolkit"** – The Agno MCP client cannot reach configured MCP server(s). In Docker or restricted networks, set `MCP_DISABLED=1` (or `MCP_SERVER_URLS=none`) so Neo tool-execution agents run without remote MCP.
 - **WebSocket error: (, '')** – Usually harmless: the client (e.g. OS UI) closed the workflow WebSocket (e.g. switching tabs or agents). No action needed unless workflows consistently fail to run.
 
 ---
@@ -341,6 +350,18 @@ Coolify builds the image in a helper container and tags it with its own name. To
 - **PORT** – If deploy fails with "Bind for 0.0.0.0:8000 failed: port is already allocated", set **PORT** to a free port (e.g. `8001`) in Coolify's environment variables so the API binds to that port instead.
 
 After setting these, redeploy so `docker compose up -d` uses the built image.
+
+### Plane MCP on Coolify (self-hosted)
+
+Set these env vars:
+
+- `MCP_DISABLED=0`
+- `MCP_SERVER_URLS=none` (or keep other non-Plane MCP URLs here)
+- `PLANE_BASE_URL=https://plane.theaibuildr.com`
+- `PLANE_API_KEY=<your-plane-api-key>`
+- `PLANE_WORKSPACE_SLUG=Agent-ws`
+
+The app will auto-add Plane MCP through stdio when these are present.
 
 ---
 
