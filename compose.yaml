@@ -3,8 +3,6 @@ services:
     image: agnohq/pgvector:18
     container_name: agentos-db
     restart: unless-stopped
-    ports:
-      - "5434:5432"
     volumes:
       - pgdata:/var/lib/postgresql
     environment:
@@ -24,10 +22,11 @@ services:
       context: .
       dockerfile: Dockerfile
     image: ${IMAGE_NAME:-agentos-api}:${IMAGE_TAG:-latest}
-    command: uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}
+    # Keep container port fixed; only host port should vary.
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000
     restart: unless-stopped
     ports:
-      - "${PORT:-8000}:${PORT:-8000}"
+      - "${PORT:-8080}:8000"
     volumes:
       - agentos-data:/data
     environment:
