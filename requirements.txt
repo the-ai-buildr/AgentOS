@@ -10,6 +10,8 @@ certifi==2026.2.25
 cffi==2.0.0
 charset-normalizer==3.4.5
 click==8.3.1
+composio==0.11.2
+composio-client==1.27.0
 croniter==6.0.0
 cryptography==46.0.5
 ddgs==9.11.2
@@ -37,6 +39,7 @@ idna==3.11
 importlib-metadata==8.7.1
 jinja2==3.1.6
 jiter==0.13.0
+json-schema-to-pydantic==0.4.10
 jsonschema==4.26.0
 jsonschema-specifications==2025.9.1
 lxml==6.0.2
@@ -66,6 +69,7 @@ pydantic-extra-types==2.11.0
 pydantic-settings==2.13.1
 pygments==2.19.2
 pyjwt==2.11.0
+pysher==1.0.8
 python-dateutil==2.9.0.post0
 python-dotenv==1.2.2
 python-multipart==0.0.22
@@ -73,6 +77,7 @@ pytz==2026.1.post1
 pyyaml==6.0.3
 referencing==0.37.0
 reportlab==4.4.10
+requests==2.32.5
 rich==14.3.3
 rich-toolkit==0.19.7
 rignore==0.7.6
@@ -95,6 +100,7 @@ urllib3==2.6.3
 uvicorn==0.41.0
 uvloop==0.22.1
 watchfiles==1.1.1
+websocket-client==1.9.0
 websockets==16.0
 wrapt==1.17.3
 zipp==3.23.0

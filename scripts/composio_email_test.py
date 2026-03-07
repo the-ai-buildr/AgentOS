@@ -34,7 +34,11 @@ async def main() -> None:
     load_dotenv()
 
     composio_api_key = require_env("COMPOSIO_API_KEY")
-    external_user_id = os.getenv("COMPOSIO_EXTERNAL_USER_ID", "local-test-user")
+    external_user_id = (
+        os.getenv("COMPOSIO_EXTERNAL_USER_ID", "").strip()
+        or os.getenv("COMPOSIO_EXT_USER_ID", "").strip()
+        or "local-test-user"
+    )
     model_name = os.getenv("OPENROUTER_MODEL", "openai/gpt-4o-mini")
 
     # OpenAI Agents SDK uses OpenAI-compatible env vars. Point those at

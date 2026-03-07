@@ -171,7 +171,7 @@ docker exec -it agentos-api python -m src.agents.knowledge_agent
 
 ### Tools + MCP (via Neo Team)
 
-Tool execution is now handled by Neo team members (`tools_agent`, `plane_agent`, and `pulse_agent`) instead of a standalone MCP agent.
+Tool execution is now handled by Neo team members (`tools_agent`, `composio_agent`, `plane_agent`, and `pulse_agent`) instead of a standalone MCP agent.
 
 Configure one or more MCP servers with `MCP_SERVER_URLS` (comma or newline-separated URLs).
 The MCP setup is intentionally simple and env-driven in `src/tools/mcp_tools.py`.
@@ -189,6 +189,28 @@ PLANE_WORKSPACE_SLUG=<workspace-slug>
 ```
 
 You can also keep other MCP URLs in `MCP_SERVER_URLS` (comma/newline list) if needed.
+
+#### Composio Hosted MCP minimal setup
+
+Enable Composio Hosted MCP for Neo Team with:
+
+```env
+COMPOSIO_DISABLED=0
+COMPOSIO_API_KEY=<composio-api-key>
+COMPOSIO_EXTERNAL_USER_ID=<composio-user-id>
+# Backward-compatible alias still supported:
+# COMPOSIO_EXT_USER_ID=<composio-user-id>
+```
+
+When enabled, Composio tools are attached to:
+- `composio_agent` (specialist for authenticated cross-app actions), and
+- `tools_agent` (fallback/general tool executor).
+
+Quick smoke test (team wiring + tool attachment):
+
+```bash
+uv run python scripts/composio_team_smoke_test.py
+```
 
 ---
 
@@ -317,6 +339,10 @@ python -m app.main
 | `MCP_SERVER_URLS` | No | `https://docs.agno.com/mcp` | MCP endpoints for Neo tool-execution agents (comma or newline separated). Set to `none` or use `MCP_DISABLED=1` to disable remote MCP (e.g. when running in Docker and the default URL is unreachable). |
 | `MCP_DISABLED` | No | - | Set to `1`, `true`, or `yes` to disable MCP tools for Neo tool-execution agents (avoids "Failed to initialize MCP toolkit" when the remote server is unreachable). |
 | `AGNO_ASSIST_MCP_SERVER_URLS` | No | - | Optional MCP endpoints for Agno Assist (comma or newline separated) |
+| `COMPOSIO_DISABLED` | No | `1` | Set to `0` to enable Composio Hosted MCP tool loading for Neo Team agents |
+| `COMPOSIO_API_KEY` | No | - | API key used to create a Composio Hosted MCP session |
+| `COMPOSIO_EXTERNAL_USER_ID` | No | - | Canonical Composio external user identifier used to open the hosted session |
+| `COMPOSIO_EXT_USER_ID` | No | - | Legacy alias for `COMPOSIO_EXTERNAL_USER_ID` (supported for backward compatibility) |
 | `PLANE_BASE_URL` | No | - | Base URL of your Plane instance (e.g. `https://plane.theaibuildr.com`) for Plane stdio MCP |
 | `PLANE_API_KEY` | No | - | Plane API key used by Plane stdio MCP |
 | `PLANE_WORKSPACE_SLUG` | No | - | Plane workspace slug used by Plane stdio MCP |
@@ -337,6 +363,7 @@ python -m app.main
   Or: `make clean && make up`.
 
 - **"Failed to initialize MCP toolkit"** – The Agno MCP client cannot reach configured MCP server(s). In Docker or restricted networks, set `MCP_DISABLED=1` (or `MCP_SERVER_URLS=none`) so Neo tool-execution agents run without remote MCP.
+- **Composio tools not showing up** – Ensure `COMPOSIO_DISABLED=0`, `COMPOSIO_API_KEY` is set, and one of `COMPOSIO_EXTERNAL_USER_ID` or `COMPOSIO_EXT_USER_ID` is provided. Then run `uv run python scripts/composio_team_smoke_test.py`.
 - **WebSocket error: (, '')** – Usually harmless: the client (e.g. OS UI) closed the workflow WebSocket (e.g. switching tabs or agents). No action needed unless workflows consistently fail to run.
 
 ---

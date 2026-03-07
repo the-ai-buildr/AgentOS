@@ -12,7 +12,10 @@ from src.prompts import load_prompt
 from src.teams.dev_team import dev_team
 from src.teams.research_team import research_team
 from src.teams.shared import duckdb_path, neo_skills, neo_team_learning_store
+from src.tools.composio_tools import build_composio_mcp_tools
 from src.tools.mcp_tools import build_mcp_tools
+
+composio_tools = build_composio_mcp_tools()
 
 # Neo Communication Agent
 communication_agent = Agent(
@@ -63,8 +66,21 @@ tools_agent = Agent(
     tools=[
         DuckDuckGoTools(),
         DuckDbTools(db_path=duckdb_path),
+        *composio_tools,
         *build_mcp_tools(),
     ],
+    add_datetime_to_context=True,
+    markdown=True,
+)
+
+# Neo Composio Agent
+composio_agent = Agent(
+    id="neo-composio-agent",
+    name="Composio Agent",
+    role="Composio-powered integrations specialist. Executes connected SaaS actions through Hosted MCP with explicit confirmation for side-effect actions.",
+    model=OpenRouter.create(model_type="gemini-flash"),
+    instructions=load_prompt("composio_agent.md"),
+    tools=composio_tools,
     add_datetime_to_context=True,
     markdown=True,
 )
@@ -107,6 +123,7 @@ neo_team = Team(
         project_manager,
         plane_agent,
         tools_agent,
+        composio_agent,
         dev_team,
         research_team,
         content_agent,
@@ -137,5 +154,6 @@ __all__ = [
     "project_manager",
     "plane_agent",
     "tools_agent",
+    "composio_agent",
     "content_agent",
 ]
