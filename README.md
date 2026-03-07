@@ -313,6 +313,7 @@ python -m app.main
 | `PLANE_WORKSPACE_SLUG` | No | - | Plane workspace slug used for MCP header |
 | `IMAGE_NAME` | No | `agentos-api` | Image name for the API service (set in Coolify to the image you build) |
 | `IMAGE_TAG` | No | `latest` | Image tag (set in Coolify if you use a specific tag) |
+| `PORT` | No | `8000` | Host port for the API (set in Coolify to another port, e.g. `8001`, if "port is already allocated") |
 
 ---
 
@@ -337,6 +338,7 @@ Coolify builds the image in a helper container and tags it with its own name. To
 
 - **IMAGE_NAME** – Set to the full image name Coolify uses for this service (e.g. your Coolify registry URL and path, or the generated image name in the build step).
 - **IMAGE_TAG** – Optional; set if Coolify uses a tag other than `latest`.
+- **PORT** – If deploy fails with "Bind for 0.0.0.0:8000 failed: port is already allocated", set **PORT** to a free port (e.g. `8001`) in Coolify's environment variables so the API binds to that port instead.
 
 After setting these, redeploy so `docker compose up -d` uses the built image.
 
