@@ -23,12 +23,11 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    # Use IMAGE_NAME/IMAGE_TAG in Coolify (or other CI) so compose uses the image you built instead of pulling
     image: ${IMAGE_NAME:-agentos-api}:${IMAGE_TAG:-latest}
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000
+    command: uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}
     restart: unless-stopped
     ports:
-      - "${PORT:-8000}:8000"
+      - "${PORT:-8000}:${PORT:-8000}"
     volumes:
       - agentos-data:/data
     environment:
@@ -45,7 +44,6 @@ services:
       WAIT_FOR_DB_TIMEOUT: "60"
       PRINT_ENV_ON_LOAD: "False"
       OPENROUTER_API_KEY: ${OPENROUTER_API_KEY}
-      # Use OpenRouter for chat: same key, point client at OpenRouter (not api.openai.com)
       OPENAI_API_KEY: ${OPENROUTER_API_KEY}
       OPENAI_BASE_URL: "https://openrouter.ai/api/v1"
       MCP_DISABLED: ${MCP_DISABLED:-1}
