@@ -53,6 +53,7 @@ agno_assist = Agent(
     # Learning
     learning=LearningMachine(
         knowledge=agno_assist_knowledge,
+        db=agent_db,
         user_profile=UserProfileConfig(mode=LearningMode.AGENTIC),
         user_memory=UserMemoryConfig(mode=LearningMode.AGENTIC),
         learned_knowledge=LearnedKnowledgeConfig(mode=LearningMode.AGENTIC),

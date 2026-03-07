@@ -9,10 +9,9 @@ from agno.learn import (
     UserProfileConfig,
 )
 from agno.learn.stores import learned_knowledge
-from src.prompts import load_prompt
 from src.models import OpenRouter
-# from src.tools.mcp_tools import build_mcp_tools
 from db import get_postgres_db
+from src.agents.agno_assist import agno_assist
 
 # Learning Machine Configuration
 learned_knowledge_config = LearnedKnowledgeConfig(
@@ -52,60 +51,52 @@ neo_team_learning_store = LearningMachine(
     learned_knowledge=learned_knowledge_config,
 )
 
-# Neo Chief of Staff
-# chief_of_staff = Agent(
-#     id="neo-chief-of-staff",
-#     name="Neo Chief of Staff",
+# Neo Pulse Dispatcher
+# pulse_dispatcher = Agent(
+#     id="neo-pulse-dispatcher",
+#     name="Neo Pulse Dispatcher",
 #     model=OpenRouter.create(model_type="claude-sonnet"),
 #     db=get_postgres_db(),
-#     instructions=load_prompt("neo_chief_of_staff.md"),
+#     instructions=load_prompt("pulse_dispatcher.md"),
 #     tools=build_mcp_tools(default_urls=[]),
-#     add_history_to_context=True,
-#     num_history_runs=5,
-#     add_datetime_to_context=True,
-#     markdown=True,
 # )
-
-# Neo Pulse Dispatcher
-pulse_dispatcher = Agent(
-    id="neo-pulse-dispatcher",
-    name="Neo Pulse Dispatcher",
-    model=OpenRouter.create(model_type="claude-sonnet"),
-    db=get_postgres_db(),
-    instructions=load_prompt("neo_pulse_dispatcher.md"),
-    tools=build_mcp_tools(default_urls=[]),
-)
 
 # Neo Agent
 neo_agent = Agent(
     id="neo-agent",
     name="Neo Agent",
     model=OpenRouter.create(model_type="claude-sonnet"),
+    db=get_postgres_db(),
     instructions="You are the Neo Agent, you are the main agent for the Neo Team.",
-    add_session_state_to_context = True,
-    add_memories_to_context = True,
+    add_session_state_to_context=True,
+    add_memories_to_context=True,
     learning=neo_team_learning_store,
     add_history_to_context=True,
     num_history_runs=5,
     add_datetime_to_context=True,
 )
 
-slack_agent = Agent(
-    id="slack-agent",
-    name="Slack Agent",
+# Neo General Agent
+neo_general_agent = Agent(
+    id="neo--gen-agent",
+    name="Neo general agent",
     model=OpenRouter.create(model_type="claude-sonnet"),
-    instructions=load_prompt("slack_agent.md"),
+    db=get_postgres_db(),
+    instructions="You are the Neo general agent, you are the general agent for the Neo Team.",
+    add_session_state_to_context=True,
+    add_memories_to_context=True,
     learning=neo_team_learning_store,
     add_history_to_context=True,
     num_history_runs=5,
     add_datetime_to_context=True,
 )
+
 
 # Neo Team
 neo_team = Team(    
     id="neo-team",
     name="Neo Orchestrator Team",
-    members=[neo_agent, pulse_dispatcher, slack_agent],
+    members=[neo_agent, neo_general_agent],
     enable_session_summaries=True,
     enable_agentic_memory=True,
     enable_agentic_state=True,

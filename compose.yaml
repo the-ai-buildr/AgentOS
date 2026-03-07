@@ -11,6 +11,12 @@ services:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASS}
       POSTGRES_DB: ${DB_DATABASE}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
+      interval: 3s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
 
   agentos-api:
     container_name: agentos-api
@@ -21,6 +27,8 @@ services:
     image: ${IMAGE_NAME:-agentos-api}:${IMAGE_TAG:-latest}
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000
     restart: unless-stopped
+    ports:
+      - "8000:8000"
     volumes:
       - agentos-data:/data
     environment:
@@ -34,13 +42,19 @@ services:
       DB_DATABASE: ${DB_DATABASE}
       OS_SECURITY_KEY: ${OS_SECURITY_KEY}
       WAIT_FOR_DB: "True"
+      WAIT_FOR_DB_TIMEOUT: "60"
       PRINT_ENV_ON_LOAD: "False"
       OPENROUTER_API_KEY: ${OPENROUTER_API_KEY}
+      # Use OpenRouter for chat: same key, point client at OpenRouter (not api.openai.com)
+      OPENAI_API_KEY: ${OPENROUTER_API_KEY}
+      OPENAI_BASE_URL: "https://openrouter.ai/api/v1"
+      MCP_DISABLED: ${MCP_DISABLED:-1}
       SLACK_TOKEN: ${SLACK_TOKEN}
       SLACK_SIGNING_SECRET: ${SLACK_SIGNING_SECRET}
       SLACK_GROUP_POLICY: ${SLACK_GROUP_POLICY:-open}
     depends_on:
-      - agentos-db
+      agentos-db:
+        condition: service_healthy
     extra_hosts:
       - "host.docker.internal:host-gateway"
 

@@ -107,7 +107,9 @@ def build_mcp_tools(
     env_var: str = "MCP_SERVER_URLS",
     default_urls: Iterable[str] | None = None,
     disable_env_var: str = "MCP_DISABLED",
- ) -> list[MCPTools]:
+) -> list[MCPTools]:
+    if os.getenv(disable_env_var, "").strip().lower() in ("1", "true", "yes"):
+        return []
     urls = get_mcp_urls(
         env_var=env_var, default_urls=default_urls, disable_env_var=disable_env_var
     )

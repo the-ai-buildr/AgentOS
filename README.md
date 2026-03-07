@@ -50,6 +50,76 @@ docker compose up -d --build
 
 ---
 
+## Run locally with Docker
+
+Run the full stack (API + Postgres) on your machine with Docker.
+
+### Prerequisites
+
+- [Docker Desktop](https://www.docker.com/products/docker-desktop) installed and running
+
+### 1. Configure environment
+
+From the repo root, create a `.env` file with at least:
+
+```bash
+# Required for agents
+OPENAI_API_KEY=sk-...   # or OPENROUTER_API_KEY for OpenRouter models
+
+# Database (defaults shown; optional if you use these values)
+DB_USER=ai
+DB_PASS=ai
+DB_DATABASE=ai
+
+# Optional: disable remote MCP if the default server is unreachable from the container
+# MCP_DISABLED=1
+```
+
+### 2. Start the stack
+
+```bash
+docker compose up -d --build
+```
+
+This builds the API image and starts:
+
+- **agentos-api** – AgentOS API (FastAPI)
+- **agentos-db** – PostgreSQL with pgvector
+
+### 3. Use the API
+
+| What        | URL                        |
+|-------------|----------------------------|
+| API         | http://localhost:8000      |
+| OpenAPI docs| http://localhost:8000/docs |
+| Health      | http://localhost:8000/health |
+
+PostgreSQL is exposed on **localhost:5434** (host) → 5432 (container). Use `DB_HOST=localhost` and `DB_PORT=5434` if you connect from the host (e.g. a local client or IDE).
+
+### 4. Useful commands
+
+```bash
+# View API logs (follow)
+docker compose logs -f agentos-api
+
+# View DB logs
+docker compose logs -f agentos-db
+
+# Stop everything
+docker compose down
+
+# Stop and remove volumes (resets DB and stored data)
+docker compose down -v
+```
+
+### 5. Optional: connect to Agno OS (control plane)
+
+1. Open [os.agno.com](https://os.agno.com)
+2. Click **Add OS** → **Local**
+3. Enter a **public URL** (the control plane cannot reach `localhost`). For local runs: use a tunnel (e.g. `ngrok http 8000`), then paste the HTTPS URL. For deployed runs: use your server URL.
+
+---
+
 ## The Agents
 
 ### Agno Assist (Personal Agent that Learns)
@@ -96,7 +166,7 @@ What documents are in your knowledge base?
 
 **Load documents:**
 ```sh
-docker exec -it agentos-api python -m agents.knowledge_agent
+docker exec -it agentos-api python -m src.agents.knowledge_agent
 ```
 
 ### MCP Agent
@@ -247,6 +317,14 @@ python -m app.main
 ---
 
 ## Troubleshooting
+
+- **API seems to hang on startup** – The API waits for Postgres, then runs DB init at import. Compose now starts the API only after the DB is *healthy*. If it still hangs: check `docker compose logs -f agentos-api`; ensure `.env` DB credentials match and run `make clean && make up`; or set `WAIT_FOR_DB_TIMEOUT=30`.
+- **API container restart loop / "password authentication failed for user \"ai\""** – The API can’t log in to Postgres. Usually the `pgdata` volume was created with different `DB_USER`/`DB_PASS`/`DB_DATABASE` (or no `.env`). Fix: ensure `.env` has `DB_USER`, `DB_PASS`, and `DB_DATABASE`, then reset the DB so Postgres re-inits with those values:
+  ```bash
+  docker compose down -v
+  docker compose up -d --build
+  ```
+  Or: `make clean && make up`.
 
 - **"Failed to initialize MCP toolkit"** – The Agno MCP client cannot reach the configured MCP server(s). In Docker or restricted networks, set `MCP_DISABLED=1` (or `MCP_SERVER_URLS=none`) so the MCP agent runs without remote tools; you can still use local MCP servers defined in `src/tools/mcp_servers/*.json`.
 - **WebSocket error: (, '')** – Usually harmless: the client (e.g. OS UI) closed the workflow WebSocket (e.g. switching tabs or agents). No action needed unless workflows consistently fail to run.
