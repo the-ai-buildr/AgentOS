@@ -21,7 +21,7 @@ Use this skill when breaking down a complex objective, project, or request into 
 
 1. **Restate the objective** in one sentence to confirm understanding
 2. **Identify deliverables** — what tangible outputs does this produce?
-3. **Decompose into tasks** (max 8 per plan; split into phases if larger)
+3. **Decompose into tasks** (max 6 per plan; split into phases if larger)
 4. **For each task define:**
    - Title (verb-first, action-oriented)
    - Description (what, not how)
