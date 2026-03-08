@@ -26,6 +26,11 @@ class Settings(BaseSettings):
         validation_alias=AliasChoices("SLACK_BOT_TOKEN", "SLACK_TOKEN"),
     )
     slack_signing_secret: str | None = Field(default=None, validation_alias="SLACK_SIGNING_SECRET")
+    slack_workspace_channel_id: str | None = Field(default=None, validation_alias="SLACK_WORKSPACE_CHANNEL_ID")
+    slack_workspace_webhook_url: str | None = Field(
+        default=None,
+        validation_alias=AliasChoices("SLACK_WORKSPACE_WEBHOOK_URL", "SLACK_WEBHOOK_URL"),
+    )
 
 
 @lru_cache(maxsize=1)

@@ -3,6 +3,7 @@
 import logging
 import os
 import shutil
+from functools import lru_cache
 from typing import Iterable, Optional
 from urllib.parse import urlparse
 
@@ -68,10 +69,35 @@ def build_mcp_tools(
     env_var: str = "MCP_SERVER_URLS",
     default_urls: Iterable[str] | None = None,
     disable_env_var: str = "MCP_DISABLED",
+    include_plane_stdio: bool = True,
  ) -> list[MCPTools]:
-    """Build MCP tools from URLs plus optional Plane stdio tool."""
+    """
+    Build MCP tools from URLs plus optional Plane stdio tool.
+
+    Instances are cached by call signature so multiple agents can share one
+    initialized tool connection set instead of spawning duplicate MCP clients.
+    """
+    default_urls_tuple = tuple(default_urls or ())
+    return list(
+        _build_mcp_tools_cached(
+            env_var=env_var,
+            default_urls=default_urls_tuple,
+            disable_env_var=disable_env_var,
+            include_plane_stdio=include_plane_stdio,
+        )
+    )
+
+
+@lru_cache(maxsize=16)
+def _build_mcp_tools_cached(
+    *,
+    env_var: str,
+    default_urls: tuple[str, ...],
+    disable_env_var: str,
+    include_plane_stdio: bool,
+) -> tuple[MCPTools, ...]:
     if os.getenv(disable_env_var, "").strip().lower() in _DISABLED_VALUES:
-        return []
+        return ()
 
     urls = _get_urls_from_env(env_var=env_var, default_urls=default_urls)
     tools: list[MCPTools] = []
@@ -81,14 +107,15 @@ def build_mcp_tools(
         except Exception as e:
             log.warning("Skipping MCP server %s: %s", url, e)
 
-    try:
-        plane_stdio_tool = _build_plane_stdio_tool()
-        if plane_stdio_tool is not None:
-            tools.append(plane_stdio_tool)
-    except Exception as e:
-        log.warning("Skipping Plane stdio MCP tool: %s", e)
+    if include_plane_stdio:
+        try:
+            plane_stdio_tool = _build_plane_stdio_tool()
+            if plane_stdio_tool is not None:
+                tools.append(plane_stdio_tool)
+        except Exception as e:
+            log.warning("Skipping Plane stdio MCP tool: %s", e)
 
-    return tools
+    return tuple(tools)
 
 
 __all__ = ["build_mcp_tools"]

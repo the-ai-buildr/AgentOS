@@ -63,7 +63,11 @@ agno_assist = Agent(
     # Tools
     tools=[
         DuckDuckGoTools(),  # Primary web research
-        *build_mcp_tools(env_var="AGNO_ASSIST_MCP_SERVER_URLS", default_urls=[]),  # Optional MCP tools
+        *build_mcp_tools(
+            env_var="AGNO_ASSIST_MCP_SERVER_URLS",
+            default_urls=[],
+            include_plane_stdio=False,
+        ),  # Optional MCP tools
         DuckDbTools(db_path=duckdb_path),  # Data
     ],
     # Context

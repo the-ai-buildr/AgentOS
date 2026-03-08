@@ -12,10 +12,12 @@ from src.prompts import load_prompt
 from src.teams.dev_team import dev_team
 from src.teams.research_team import research_team
 from src.teams.shared import duckdb_path, neo_skills, neo_team_learning_store
-from src.tools.composio_tools import build_composio_mcp_tools
 from src.tools.mcp_tools import build_mcp_tools
+from src.tools.slack_tools import send_workspace_webhook_update
 
-composio_tools = build_composio_mcp_tools()
+# Reuse one shared MCP tool set across Neo agents to avoid duplicate
+# FastMCP stdio server processes during startup.
+shared_mcp_tools = build_mcp_tools()
 
 # Neo Communication Agent
 communication_agent = Agent(
@@ -43,6 +45,21 @@ project_manager = Agent(
     markdown=True,
 )
 
+# Neo Workspace Channel Agent
+workspace_channel_agent = Agent(
+    id="neo-workspace-channel-agent",
+    name="Workspace Channel Agent",
+    role="Slack #workspace specialist. Turns requests into executable plans, tracks blockers, and returns concise action-oriented updates.",
+    model=OpenRouter.create(model_type="claude-sonnet"),
+    instructions=load_prompt("workspace_channel_agent.md"),
+    tools=[ReasoningTools(add_instructions=True), send_workspace_webhook_update, *shared_mcp_tools],
+    skills=neo_skills,
+    add_datetime_to_context=True,
+    add_history_to_context=True,
+    num_history_runs=5,
+    markdown=True,
+)
+
 # Neo Plane Agent
 plane_agent = Agent(
     id="neo-plane-agent",
@@ -50,7 +67,7 @@ plane_agent = Agent(
     role="Plane system-of-record operator. Creates, updates, and queries projects, issues, prompts, and templates in Plane.",
     model=OpenRouter.create(model_type="gemini-flash"),
     instructions=load_prompt("plane_agent.md"),
-    tools=build_mcp_tools(),
+    tools=shared_mcp_tools,
     skills=neo_skills,
     add_datetime_to_context=True,
     markdown=True,
@@ -66,21 +83,9 @@ tools_agent = Agent(
     tools=[
         DuckDuckGoTools(),
         DuckDbTools(db_path=duckdb_path),
-        *composio_tools,
-        *build_mcp_tools(),
+        send_workspace_webhook_update,
+        *shared_mcp_tools,
     ],
-    add_datetime_to_context=True,
-    markdown=True,
-)
-
-# Neo Composio Agent
-composio_agent = Agent(
-    id="neo-composio-agent",
-    name="Composio Agent",
-    role="Composio-powered integrations specialist. Executes connected SaaS actions through Hosted MCP with explicit confirmation for side-effect actions.",
-    model=OpenRouter.create(model_type="gemini-flash"),
-    instructions=load_prompt("composio_agent.md"),
-    tools=composio_tools,
     add_datetime_to_context=True,
     markdown=True,
 )
@@ -103,7 +108,7 @@ pulse_agent = Agent(
     role="Autonomous operations heartbeat. Scans Plane for ready work, dispatches to team members, detects stalled tasks, and logs operational intelligence.",
     model=OpenRouter.create(model_type="gemini-flash"),
     instructions=load_prompt("pulse_dispatcher.md"),
-    tools=build_mcp_tools(),
+    tools=shared_mcp_tools,
     skills=neo_skills,
     learning=neo_team_learning_store,
     add_datetime_to_context=True,
@@ -120,10 +125,10 @@ neo_team = Team(
     model=OpenRouter.create(model_type="claude-sonnet"),
     members=[
         communication_agent,
+        workspace_channel_agent,
         project_manager,
         plane_agent,
         tools_agent,
-        composio_agent,
         dev_team,
         research_team,
         content_agent,
@@ -143,17 +148,17 @@ neo_team = Team(
 )
 
 
-if __name__ == "__main__":
-    neo_team.print_response("What is the Neo Team?", stream=True)
+# if __name__ == "__main__":
+#     neo_team.print_response("What is the Neo Team?", stream=True)
 
 
 __all__ = [
     "neo_team",
     "pulse_agent",
     "communication_agent",
+    "workspace_channel_agent",
     "project_manager",
     "plane_agent",
     "tools_agent",
-    "composio_agent",
     "content_agent",
 ]

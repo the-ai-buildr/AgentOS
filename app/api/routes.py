@@ -60,45 +60,17 @@ def _verify_slack_request(timestamp: str | None, signature: str | None, body: by
     return hmac.compare_digest(computed_signature, signature)
 
 
-def _clean_mention(text: str) -> str:
-    return text.replace(f"<@{_get_bot_user_id()}>", "").strip()
-
-
-def _agent_text_response(prompt: str) -> str:
-    if not prompt:
-        return "How can I help?"
-
-    result = slack_agent.run(prompt)
-    if isinstance(result, str):
-        return result.strip() or "How can I help?"
-
-    content = getattr(result, "content", None)
-    if isinstance(content, str):
-        return content.strip() or "How can I help?"
-
-    return str(result).strip() or "How can I help?"
-
-
 def _process_event(event: dict[str, Any]) -> None:
     client, _ = _ensure_slack_configured()
-    if event.get("type") != "app_mention":
+    message = slack_agent.normalize_event(event, bot_user_id=_get_bot_user_id())
+    if message is None:
         return
-    if event.get("bot_id"):
-        return
-
-    channel = event.get("channel")
-    text = event.get("text", "")
-    thread_ts = event.get("thread_ts") or event.get("ts")
-    if not channel:
-        return
-
-    user_prompt = _clean_mention(text)
-    response_text = _agent_text_response(user_prompt)
+    response_text = slack_agent.respond_to_message(message)
     try:
         client.chat_postMessage(
-            channel=channel,
+            channel=message.channel_id,
             text=response_text,
-            thread_ts=thread_ts,
+            thread_ts=message.thread_ts,
         )
     except SlackApiError:
         # Keep webhook fast/robust: swallow Slack post errors here.
