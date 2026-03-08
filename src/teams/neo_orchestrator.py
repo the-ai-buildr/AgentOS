@@ -7,6 +7,7 @@ from agno.tools.duckdb import DuckDbTools
 from agno.tools.duckduckgo import DuckDuckGoTools
 from agno.tools.reasoning import ReasoningTools
 
+from src.integrations.composio import build_composio_email_tools, build_composio_tools
 from src.models import OpenRouter
 from src.prompts import load_prompt
 from src.teams.dev_team import dev_team
@@ -19,6 +20,10 @@ from src.tools.slack_tools import send_workspace_webhook_update
 # FastMCP stdio server processes during startup.
 shared_mcp_tools = build_mcp_tools()
 
+# Domain-scoped Composio tool sets — attach only what each agent needs.
+composio_email_tools = build_composio_email_tools()
+composio_all_tools = build_composio_tools()
+
 # Neo Communication Agent
 communication_agent = Agent(
     id="neo-communication-agent",
@@ -26,6 +31,7 @@ communication_agent = Agent(
     role="User-facing intake specialist. Asks probing questions, gathers context, and produces structured briefs.",
     model=OpenRouter.create(model_type="claude-sonnet"),
     instructions=load_prompt("communication_agent.md"),
+    tools=[*composio_email_tools],
     add_datetime_to_context=True,
     add_history_to_context=True,
     num_history_runs=5,
@@ -85,6 +91,7 @@ tools_agent = Agent(
         DuckDbTools(db_path=duckdb_path),
         send_workspace_webhook_update,
         *shared_mcp_tools,
+        *composio_all_tools,
     ],
     add_datetime_to_context=True,
     markdown=True,

@@ -1,4 +1,8 @@
-"""Smoke test for Composio wiring in Neo root team."""
+"""Smoke test for per-agent Composio wiring in Neo team.
+
+Verifies that domain-scoped Composio MCP tools are attached to the
+correct individual agents rather than a single monolithic Composio agent.
+"""
 
 from __future__ import annotations
 
@@ -13,36 +17,42 @@ def _load_dotenv() -> None:
     load_dotenv()
 
 
+def _composio_tools_on(agent, *, prefix: str | None = None) -> list[MCPTools]:
+    """Return Composio MCPTools attached to *agent*, optionally filtered by prefix."""
+    return [
+        tool
+        for tool in (agent.tools or [])
+        if isinstance(tool, MCPTools)
+        and (prefix is None or getattr(tool, "tool_name_prefix", None) == prefix)
+    ]
+
+
 def main() -> None:
     _load_dotenv()
 
-    from src.teams.neo_orchestrator import composio_agent, neo_team, tools_agent
+    from src.teams.neo_orchestrator import communication_agent, neo_team, tools_agent
 
-    member_ids = [getattr(member, "id", "") for member in neo_team.members]
-    if "neo-composio-agent" not in member_ids:
-        raise RuntimeError("Composio agent is not registered in neo_team.members")
+    # tools_agent should have the generic (all-actions) Composio tools.
+    generic = _composio_tools_on(tools_agent, prefix="composio")
+    if not generic:
+        raise RuntimeError("No generic Composio MCP tools attached to tools_agent")
 
-    composio_tools_in_tools_agent = [
-        tool
-        for tool in (tools_agent.tools or [])
-        if isinstance(tool, MCPTools) and getattr(tool, "tool_name_prefix", None) == "composio"
-    ]
+    # communication_agent should have email-scoped Composio tools.
+    email = _composio_tools_on(communication_agent, prefix="composio_email")
+    if not email:
+        raise RuntimeError("No Composio email MCP tools attached to communication_agent")
 
-    composio_tools_in_composio_agent = [
-        tool
-        for tool in (composio_agent.tools or [])
-        if isinstance(tool, MCPTools) and getattr(tool, "tool_name_prefix", None) == "composio"
-    ]
+    # Monolithic composio_agent should NOT exist as a team member.
+    member_ids = [getattr(m, "id", "") for m in neo_team.members]
+    if "neo-composio-agent" in member_ids:
+        raise RuntimeError(
+            "Monolithic composio_agent still registered in neo_team — "
+            "should be replaced by per-agent Composio tools"
+        )
 
-    if not composio_tools_in_tools_agent:
-        raise RuntimeError("No Composio MCP tools were attached to tools_agent")
-    if not composio_tools_in_composio_agent:
-        raise RuntimeError("No Composio MCP tools were attached to composio_agent")
-
-    print("Composio smoke test passed.")
-    print(f"- neo_team has composio agent: {'neo-composio-agent' in member_ids}")
-    print(f"- tools_agent composio tool count: {len(composio_tools_in_tools_agent)}")
-    print(f"- composio_agent composio tool count: {len(composio_tools_in_composio_agent)}")
+    print("Composio integration smoke test passed.")
+    print(f"  tools_agent          — generic composio tools: {len(generic)}")
+    print(f"  communication_agent  — email composio tools:   {len(email)}")
 
 
 if __name__ == "__main__":
