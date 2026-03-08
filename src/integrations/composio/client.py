@@ -51,7 +51,7 @@ def _create_hosted_mcp_connection(
 def get_composio_session(
     *,
     api_key_env_var: str = "COMPOSIO_API_KEY",
-) -> tuple[str, dict[str, Any]] | None:
+ ) -> tuple[str, dict[str, Any]] | None:
     """Return ``(url, headers)`` for a Composio Hosted MCP session.
 
     Returns ``None`` when Composio is disabled, the API key is missing, or
