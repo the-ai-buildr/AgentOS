@@ -3,7 +3,7 @@
 from .composio import (
     build_composio_email_tools,
     build_composio_tools,
-    get_composio_session,
+    get_composio_toolset,
     is_composio_disabled,
 )
 from .slack import SlackMessage, format_slack_response, normalize_slack_event
@@ -14,7 +14,7 @@ __all__ = [
     "format_slack_response",
     "normalize_slack_event",
     "post_slack_webhook",
-    "get_composio_session",
+    "get_composio_toolset",
     "is_composio_disabled",
     "build_composio_tools",
     "build_composio_email_tools",

@@ -1,14 +1,14 @@
-"""Smoke test for per-agent Composio wiring in Neo team.
+"""Smoke test for Neo team integration wiring.
 
-Verifies that domain-scoped Composio MCP tools are attached to the
-correct individual agents rather than a single monolithic Composio agent.
+Verifies that Composio tools and Agno SlackTools are attached to the
+correct agents after the communications consolidation.
 """
 
 from __future__ import annotations
 
 import importlib
 
-from agno.tools.mcp import MCPTools
+from agno.tools.slack import SlackTools
 
 
 def _load_dotenv() -> None:
@@ -17,42 +17,56 @@ def _load_dotenv() -> None:
     load_dotenv()
 
 
-def _composio_tools_on(agent, *, prefix: str | None = None) -> list[MCPTools]:
-    """Return Composio MCPTools attached to *agent*, optionally filtered by prefix."""
-    return [
-        tool
-        for tool in (agent.tools or [])
-        if isinstance(tool, MCPTools)
-        and (prefix is None or getattr(tool, "tool_name_prefix", None) == prefix)
-    ]
+def _has_tool_type(agent, tool_type: type) -> bool:
+    """Check whether *agent* has at least one tool of the given type."""
+    return any(isinstance(t, tool_type) for t in (agent.tools or []))
+
+
+def _composio_tools_count(agent) -> int:
+    """Count Composio-provided tools on *agent*."""
+    return sum(
+        1
+        for t in (agent.tools or [])
+        if type(t).__module__.startswith("composio")
+    )
 
 
 def main() -> None:
     _load_dotenv()
 
-    from src.teams.neo_orchestrator import communication_agent, neo_team, tools_agent
+    from src.teams.neo_orchestrator import (
+        communication_agent,
+        neo_team,
+        tools_agent,
+    )
 
-    # tools_agent should have the generic (all-actions) Composio tools.
-    generic = _composio_tools_on(tools_agent, prefix="composio")
-    if not generic:
-        raise RuntimeError("No generic Composio MCP tools attached to tools_agent")
+    # tools_agent should have broad Composio tools.
+    tools_composio = _composio_tools_count(tools_agent)
+    if not tools_composio:
+        raise RuntimeError("No Composio tools attached to tools_agent")
 
     # communication_agent should have email-scoped Composio tools.
-    email = _composio_tools_on(communication_agent, prefix="composio_email")
-    if not email:
-        raise RuntimeError("No Composio email MCP tools attached to communication_agent")
+    comm_composio = _composio_tools_count(communication_agent)
+    if not comm_composio:
+        raise RuntimeError("No Composio email tools attached to communication_agent")
 
-    # Monolithic composio_agent should NOT exist as a team member.
+    # SlackTools should be on communication_agent (the unified comms hub).
+    if not _has_tool_type(communication_agent, SlackTools):
+        raise RuntimeError("SlackTools not attached to communication_agent")
+
+    # tools_agent should NOT have SlackTools (comms agent owns Slack).
+    if _has_tool_type(tools_agent, SlackTools):
+        raise RuntimeError("SlackTools should not be on tools_agent — use communication_agent")
+
+    # Monolithic composio_agent and workspace_channel_agent should NOT be team members.
     member_ids = [getattr(m, "id", "") for m in neo_team.members]
-    if "neo-composio-agent" in member_ids:
-        raise RuntimeError(
-            "Monolithic composio_agent still registered in neo_team — "
-            "should be replaced by per-agent Composio tools"
-        )
+    for stale_id in ("neo-composio-agent", "neo-workspace-channel-agent"):
+        if stale_id in member_ids:
+            raise RuntimeError(f"{stale_id} still registered in neo_team")
 
-    print("Composio integration smoke test passed.")
-    print(f"  tools_agent          — generic composio tools: {len(generic)}")
-    print(f"  communication_agent  — email composio tools:   {len(email)}")
+    print("Integration smoke test passed.")
+    print(f"  communication_agent  — composio tools: {comm_composio}, SlackTools: yes")
+    print(f"  tools_agent          — composio tools: {tools_composio}, SlackTools: no")
 
 
 if __name__ == "__main__":

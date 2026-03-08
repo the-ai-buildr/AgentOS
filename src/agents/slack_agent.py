@@ -54,9 +54,9 @@ class SlackAgentCoordinator:
     def _get_workspace_agent(self) -> Any:
         """Lazily load the workspace specialist only when configured/needed."""
         if self._workspace_agent is None:
-            from src.teams.neo_orchestrator import workspace_channel_agent
+            from src.teams.neo_orchestrator import communication_agent
 
-            self._workspace_agent = workspace_channel_agent
+            self._workspace_agent = communication_agent
         return self._workspace_agent
 
     def notify_workspace(self, text: str, *, blocks: list[dict[str, Any]] | None = None) -> bool:

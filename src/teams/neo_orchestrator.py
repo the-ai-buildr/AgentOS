@@ -6,6 +6,7 @@ from agno.team.mode import TeamMode
 from agno.tools.duckdb import DuckDbTools
 from agno.tools.duckduckgo import DuckDuckGoTools
 from agno.tools.reasoning import ReasoningTools
+from agno.tools.slack import SlackTools
 
 from src.integrations.composio import build_composio_email_tools, build_composio_tools
 from src.models import OpenRouter
@@ -14,7 +15,6 @@ from src.teams.dev_team import dev_team
 from src.teams.research_team import research_team
 from src.teams.shared import duckdb_path, neo_skills, neo_team_learning_store
 from src.tools.mcp_tools import build_mcp_tools
-from src.tools.slack_tools import send_workspace_webhook_update
 
 # Reuse one shared MCP tool set across Neo agents to avoid duplicate
 # FastMCP stdio server processes during startup.
@@ -24,14 +24,23 @@ shared_mcp_tools = build_mcp_tools()
 composio_email_tools = build_composio_email_tools()
 composio_all_tools = build_composio_tools()
 
-# Neo Communication Agent
+# Full Slack tools — the communication agent owns all Slack interaction.
+slack_tools = SlackTools(
+    enable_send_message=True,
+    enable_get_channel_history=True,
+    enable_list_channels=True,
+    enable_search_messages=True,
+    enable_get_thread=True,
+)
+
+# Neo Communication Agent — unified comms hub (Slack, email, user intake)
 communication_agent = Agent(
     id="neo-communication-agent",
     name="Communication Agent",
-    role="User-facing intake specialist. Asks probing questions, gathers context, and produces structured briefs.",
+    role="Unified communications hub. Handles user intake, Slack channel operations, and email. Owns all external messaging for the team.",
     model=OpenRouter.create(model_type="claude-sonnet"),
     instructions=load_prompt("communication_agent.md"),
-    tools=[*composio_email_tools],
+    tools=[slack_tools, *composio_email_tools],
     add_datetime_to_context=True,
     add_history_to_context=True,
     num_history_runs=5,
@@ -48,21 +57,6 @@ project_manager = Agent(
     tools=[ReasoningTools(add_instructions=True)],
     skills=neo_skills,
     add_datetime_to_context=True,
-    markdown=True,
-)
-
-# Neo Workspace Channel Agent
-workspace_channel_agent = Agent(
-    id="neo-workspace-channel-agent",
-    name="Workspace Channel Agent",
-    role="Slack #workspace specialist. Turns requests into executable plans, tracks blockers, and returns concise action-oriented updates.",
-    model=OpenRouter.create(model_type="claude-sonnet"),
-    instructions=load_prompt("workspace_channel_agent.md"),
-    tools=[ReasoningTools(add_instructions=True), send_workspace_webhook_update, *shared_mcp_tools],
-    skills=neo_skills,
-    add_datetime_to_context=True,
-    add_history_to_context=True,
-    num_history_runs=5,
     markdown=True,
 )
 
@@ -89,7 +83,6 @@ tools_agent = Agent(
     tools=[
         DuckDuckGoTools(),
         DuckDbTools(db_path=duckdb_path),
-        send_workspace_webhook_update,
         *shared_mcp_tools,
         *composio_all_tools,
     ],
@@ -132,7 +125,6 @@ neo_team = Team(
     model=OpenRouter.create(model_type="claude-sonnet"),
     members=[
         communication_agent,
-        workspace_channel_agent,
         project_manager,
         plane_agent,
         tools_agent,
@@ -163,7 +155,6 @@ __all__ = [
     "neo_team",
     "pulse_agent",
     "communication_agent",
-    "workspace_channel_agent",
     "project_manager",
     "plane_agent",
     "tools_agent",

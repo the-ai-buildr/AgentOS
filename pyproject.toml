@@ -23,6 +23,7 @@ dependencies = [
   # Tools
   "mcp",
   "composio",
+  "composio-agno",
   "reportlab",
   "ddgs",
   "duckduckgo-search",
@@ -57,7 +58,7 @@ plugins = ["pydantic.mypy"]
 exclude = [".venv*"]
 
 [[tool.mypy.overrides]]
-module = ["pgvector.*", "setuptools.*", "agno.*", "duckdb.*"]
+module = ["pgvector.*", "setuptools.*", "agno.*", "duckdb.*", "composio.*", "composio_agno.*"]
 ignore_missing_imports = true
 
 [tool.uv.pip]
