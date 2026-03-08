@@ -4,7 +4,7 @@ from agno.os import AgentOS
 from agno.scheduler import ScheduleManager
 
 from db import get_postgres_db
-from src.config.settings import Settings, get_settings
+from settings import Settings, get_settings
 
 
 def build_agent_os(settings: Settings | None = None) -> AgentOS:
