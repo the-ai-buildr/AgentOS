@@ -2,13 +2,16 @@
 
 import logging
 import os
+import shutil
 from typing import Iterable, Optional
+from urllib.parse import urlparse
 
 from agno.tools.mcp import MCPTools
 
 log = logging.getLogger(__name__)
 _DISABLED_VALUES = {"1", "true", "yes"}
 _EMPTY_VALUES = {"none", "disabled", "false", "0"}
+_NON_MCP_DOC_SUFFIXES = (".txt", ".md", ".rst", ".pdf", ".html", ".yaml", ".yml", ".json")
 
 
 def _parse_urls(raw_urls: str) -> list[str]:
@@ -16,7 +19,18 @@ def _parse_urls(raw_urls: str) -> list[str]:
     urls: list[str] = []
     for part in raw_urls.replace("\n", ",").split(","):
         url = part.strip().strip('"').strip("'")
-        if url and url.startswith(("http://", "https://")) and url not in urls:
+        if not url:
+            continue
+        if not url.startswith(("http://", "https://")):
+            continue
+
+        parsed = urlparse(url)
+        # Skip obvious docs/static files that are not MCP endpoints.
+        if parsed.path.lower().endswith(_NON_MCP_DOC_SUFFIXES):
+            log.warning("Skipping non-MCP URL in MCP_SERVER_URLS-like env: %s", url)
+            continue
+
+        if url not in urls:
             urls.append(url)
     return urls
 
@@ -35,6 +49,9 @@ def _build_plane_stdio_tool() -> Optional[MCPTools]:
     workspace_slug = os.getenv("PLANE_WORKSPACE_SLUG", "").strip()
     api_key = os.getenv("PLANE_API_KEY", "").strip() or os.getenv("PLANE_MCP_API_KEY", "").strip()
     if not base_url or not workspace_slug or not api_key:
+        return None
+    if shutil.which("uvx") is None:
+        log.warning("Skipping Plane stdio MCP tool: 'uvx' not found in PATH.")
         return None
     return MCPTools(
         command="uvx plane-mcp-server stdio",
