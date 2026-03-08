@@ -58,6 +58,12 @@ services:
       SLACK_BOT_TOKEN: ${SLACK_BOT_TOKEN}
       SLACK_SIGNING_SECRET: ${SLACK_SIGNING_SECRET}
       SLACK_GROUP_POLICY: ${SLACK_GROUP_POLICY:-open}
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8000/health || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 20s
     depends_on:
       agentos-db:
         condition: service_healthy
