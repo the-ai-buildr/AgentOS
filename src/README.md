@@ -13,12 +13,11 @@ This folder contains the runtime composition, teams, agents, prompts, and tools 
 
 - `src/agents/agno_assist.py` - Personal "second brain" assistant with learning, search, MCP tools, and DuckDB tools.
 - `src/agents/knowledge_agent.py` - RAG-first knowledge agent backed by pgvector and optional default docs loader.
-- `src/agents/slack_agent.py` - Optional Slack-oriented standalone agent.
 
 ## Runtime and Config
 
 - `src/runtime/bootstrap.py` - Composition root that builds `AgentOS`, wires teams/agents, and registers schedules.
-- `src/config/settings.py` - Environment-driven runtime settings loader.
+- `settings.py` - Environment-driven runtime settings loader.
 - `src/schedules/pulse_schedule.py` - Pulse heartbeat cron schedule registration.
 
 ## Tools and Prompts

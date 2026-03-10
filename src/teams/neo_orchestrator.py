@@ -1,123 +1,20 @@
-"""Top-level Neo orchestration team and pulse dispatcher agent."""
+"""Neo Orchestrator Team — top-level team composition."""
 
-from agno.agent import Agent
 from agno.team import Team
 from agno.team.mode import TeamMode
-from agno.tools.duckdb import DuckDbTools
-from agno.tools.duckduckgo import DuckDuckGoTools
-from agno.tools.reasoning import ReasoningTools
-from agno.tools.slack import SlackTools
 
-from src.integrations.composio import build_composio_email_tools, build_composio_tools
+from src.agents.communication_agent import communication_agent
+from src.agents.content_agent import content_agent
+from src.agents.plane_agent import plane_agent
+from src.agents.project_manager import project_manager
+from src.agents.pulse_agent import pulse_agent
+from src.agents.tools_agent import tools_agent
 from src.models import OpenRouter
 from src.prompts import load_prompt
 from src.teams.dev_team import dev_team
 from src.teams.research_team import research_team
-from src.teams.shared import duckdb_path, neo_skills, neo_team_learning_store
-from src.tools.mcp_tools import build_mcp_tools
+from src.teams.shared import neo_team_learning_store
 
-# Reuse one shared MCP tool set across Neo agents to avoid duplicate
-# FastMCP stdio server processes during startup.
-shared_mcp_tools = build_mcp_tools()
-
-# Domain-scoped Composio tool sets — attach only what each agent needs.
-composio_email_tools = build_composio_email_tools()
-composio_all_tools = build_composio_tools()
-
-# Full Slack tools — the communication agent owns all Slack interaction.
-slack_tools = SlackTools(
-    enable_send_message=True,
-    enable_get_channel_history=True,
-    enable_list_channels=True,
-    enable_search_messages=True,
-    enable_get_thread=True,
-)
-
-# Neo Communication Agent — unified comms hub (Slack, email, user intake)
-communication_agent = Agent(
-    id="neo-communication-agent",
-    name="Communication Agent",
-    role="Unified communications hub. Handles user intake, Slack channel operations, and email. Owns all external messaging for the team.",
-    model=OpenRouter.create(model_type="claude-sonnet"),
-    instructions=load_prompt("communication_agent.md"),
-    tools=[slack_tools, *composio_email_tools],
-    add_datetime_to_context=True,
-    add_history_to_context=True,
-    num_history_runs=5,
-    markdown=True,
-)
-
-# Neo Project Manager
-project_manager = Agent(
-    id="neo-project-manager",
-    name="Project Manager",
-    role="Task decomposition and planning specialist. Breaks objectives into structured task plans with acceptance criteria and dependencies.",
-    model=OpenRouter.create(model_type="claude-sonnet"),
-    instructions=load_prompt("project_manager.md"),
-    tools=[ReasoningTools(add_instructions=True)],
-    skills=neo_skills,
-    add_datetime_to_context=True,
-    markdown=True,
-)
-
-# Neo Plane Agent
-plane_agent = Agent(
-    id="neo-plane-agent",
-    name="Plane Agent",
-    role="Plane system-of-record operator. Creates, updates, and queries projects, issues, prompts, and templates in Plane.",
-    model=OpenRouter.create(model_type="gemini-flash"),
-    instructions=load_prompt("plane_agent.md"),
-    tools=shared_mcp_tools,
-    skills=neo_skills,
-    add_datetime_to_context=True,
-    markdown=True,
-)
-
-# Neo Tools Agent
-tools_agent = Agent(
-    id="neo-tools-agent",
-    name="Tools Agent",
-    role="System tool executor. Has access to all MCP tools, web search, and data tools for executing actions on behalf of the team.",
-    model=OpenRouter.create(model_type="gemini-flash"),
-    instructions=load_prompt("tools_agent.md"),
-    tools=[
-        DuckDuckGoTools(),
-        DuckDbTools(db_path=duckdb_path),
-        *shared_mcp_tools,
-        *composio_all_tools,
-    ],
-    add_datetime_to_context=True,
-    markdown=True,
-)
-
-# Neo Content Agent
-content_agent = Agent(
-    id="neo-exec-content",
-    name="Content Agent",
-    role="Writing and communication specialist. Produces status updates, documentation, stakeholder summaries, and task completion narratives.",
-    model=OpenRouter.create(model_type="claude-sonnet"),
-    instructions=load_prompt("exec_content_agent.md"),
-    add_datetime_to_context=True,
-    markdown=True,
-)
-
-# Neo Pulse Agent
-pulse_agent = Agent(
-    id="neo-pulse",
-    name="Pulse Dispatcher",
-    role="Autonomous operations heartbeat. Scans Plane for ready work, dispatches to team members, detects stalled tasks, and logs operational intelligence.",
-    model=OpenRouter.create(model_type="gemini-flash"),
-    instructions=load_prompt("pulse_dispatcher.md"),
-    tools=shared_mcp_tools,
-    skills=neo_skills,
-    learning=neo_team_learning_store,
-    add_datetime_to_context=True,
-    enable_agentic_memory=True,
-    add_memories_to_context=True,
-    markdown=True,
-)
-
-# Neo Team
 neo_team = Team(
     id="neo-team",
     name="Neo Orchestrator Team",
@@ -146,15 +43,10 @@ neo_team = Team(
     markdown=True,
 )
 
-
-# if __name__ == "__main__":
-#     neo_team.print_response("What is the Neo Team?", stream=True)
-
-
 __all__ = [
     "neo_team",
-    "pulse_agent",
     "communication_agent",
+    "pulse_agent",
     "project_manager",
     "plane_agent",
     "tools_agent",

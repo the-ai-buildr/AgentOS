@@ -1,5 +1,7 @@
-"""Top-level team exports."""
+"""Top-level team exports.
 
-from .neo_orchestrator import neo_team, pulse_agent
+Note: neo_orchestrator is NOT imported here to avoid circular imports.
+Import directly: ``from src.teams.neo_orchestrator import neo_team``
+"""
 
-__all__ = ["neo_team", "pulse_agent"]
+__all__: list[str] = []

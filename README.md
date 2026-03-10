@@ -171,7 +171,7 @@ docker exec -it agentos-api python -m src.agents.knowledge_agent
 
 ### Tools + MCP (via Neo Team)
 
-Tool execution is now handled by Neo team members (`tools_agent`, `composio_agent`, `plane_agent`, and `pulse_agent`) instead of a standalone MCP agent.
+Tool execution is now handled by Neo team members (`tools_agent`, `plane_agent`, and `pulse_agent`) instead of a standalone MCP agent.
 
 Configure one or more MCP servers with `MCP_SERVER_URLS` (comma or newline-separated URLs).
 The MCP setup is intentionally simple and env-driven in `src/tools/mcp_tools.py`.
@@ -203,8 +203,8 @@ COMPOSIO_EXTERNAL_USER_ID=<composio-user-id>
 ```
 
 When enabled, Composio tools are attached to:
-- `composio_agent` (specialist for authenticated cross-app actions), and
-- `tools_agent` (fallback/general tool executor).
+- `communication_agent` (email-scoped Composio actions), and
+- `tools_agent` (broader fallback/general tool execution).
 
 Quick smoke test (team wiring + tool attachment):
 
@@ -217,7 +217,7 @@ uv run python scripts/composio_team_smoke_test.py
 ## Project Structure
 ```
 ├── src/
-│   ├── agents/             # Standalone agents (assist, knowledge, slack)
+│   ├── agents/             # Standalone agents (assist, knowledge)
 │   ├── teams/              # Neo orchestrator + sub-teams
 │   ├── tools/              # MCP tool loading/config
 │   ├── runtime/            # AgentOS bootstrap/composition root
@@ -273,14 +273,14 @@ agent_os = AgentOS(
 
 Agno includes 100+ tool integrations. See the [full list](https://docs.agno.com/tools/toolkits).
 ```python
-from agno.tools.slack import SlackTools
 from agno.tools.google_calendar import GoogleCalendarTools
+from agno.tools.duckduckgo import DuckDuckGoTools
 
 my_agent = Agent(
     ...
     tools=[
-        SlackTools(),
         GoogleCalendarTools(),
+        DuckDuckGoTools(),
     ],
 )
 ```
@@ -398,12 +398,10 @@ Agno Assist is designed to be extended. Connect it to your existing tools:
 
 ### Communication
 ```python
-from agno.tools.slack import SlackTools
 from agno.tools.gmail import GmailTools
 
 tools=[
     ...
-    SlackTools(),    # Capture decisions from Slack
     GmailTools(),    # Track important emails
 ]
 ```
