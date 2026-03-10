@@ -68,10 +68,13 @@ def create_dev_team(
         markdown=True,
     )
 
-
+# Neo Dev Team
 dev_implementer = create_dev_implementer()
 dev_reviewer = create_dev_reviewer()
 dev_team = create_dev_team()
+
+# Standalone Dev Team
+    # todo: implement
 
 __all__ = [
     "create_dev_implementer",
